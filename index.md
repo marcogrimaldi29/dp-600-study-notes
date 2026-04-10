@@ -142,10 +142,6 @@ The site includes full-text search, Mermaid diagram rendering, and mobile-friend
 
 These notes are designed to be a structured, exam-focused summary of the most important concepts and services based on the official **[Microsoft DP-600 Study Guide](https://learn.microsoft.com/en-gb/credentials/certifications/resources/study-guides/dp-600)** and its criteria.
 
-Additional resources and study notes maintained by me, such as the **[📘 AZ-305 Study Notes](https://marcogrimaldi29.com/az-305-study-notes/)**, the **[📘 DP-700 Study Notes](https://marcogrimaldi29.com/dp-700-study-notes/)**, and more, are also available for those pursuing the Microsoft and Azure certifications at the following Landing Page:
-
-👉 **[🧑‍🏫 Microsoft Study Notes: Central Hub](https://marcogrimaldi29.com/microsoft-study-notes/)**
-
 ---
 
 ## ✍️ About the Author
