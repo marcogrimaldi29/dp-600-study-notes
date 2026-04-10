@@ -7,7 +7,7 @@ permalink: /03-implement-manage-semantic-models/
 mermaid: true
 ---
 
-# Implement & Manage Semantic Models
+# 📐 Implement & Manage Semantic Models
 {: .no_toc }
 
 > - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
@@ -24,9 +24,9 @@ Domain 3 accounts for **25–30 %** of the DP-600 exam. It spans semantic-model 
 
 ---
 
-## Design and Build Semantic Models
+## 🏗️ Design and Build Semantic Models
 
-### Choose a Storage Mode
+### 💾 Choose a Storage Mode
 
 Power BI semantic models support three storage modes. The right choice depends on data volume, latency requirements, and whether Microsoft Fabric is in play.
 
@@ -58,7 +58,7 @@ flowchart TD
 
 ---
 
-### Implement a Star Schema
+### ⭐ Implement a Star Schema
 
 A star schema organises the semantic model around **fact tables** (events / measures) surrounded by **dimension tables** (descriptive attributes). This is the foundation for performant DAX and clean reports.
 
@@ -112,7 +112,7 @@ erDiagram
 
 ---
 
-### Implement Relationships
+### 🔗 Implement Relationships
 
 #### Core Relationship Properties
 
@@ -142,7 +142,7 @@ CALCULATE(
 
 ---
 
-### Write DAX Calculations
+### ✍️ Write DAX Calculations
 
 #### Variables and CALCULATE
 
@@ -247,7 +247,7 @@ CALCULATE(
 
 ---
 
-### Calculation Groups, Dynamic Format Strings, and Field Parameters
+### 🧮 Calculation Groups, Dynamic Format Strings, and Field Parameters
 
 #### Calculation Groups
 
@@ -307,7 +307,7 @@ Field parameters allow **report consumers** to swap dimensions or measures on a 
 
 ---
 
-### Large Semantic Model Storage Format
+### 📦 Large Semantic Model Storage Format
 
 When enabled, the semantic model can exceed the default per-dataset size limit by storing segments on Premium capacity storage rather than solely in memory.
 
@@ -327,7 +327,7 @@ When enabled, the semantic model can exceed the default per-dataset size limit b
 
 ---
 
-### Design and Build Composite Models
+### 🧩 Design and Build Composite Models
 
 Composite models combine **multiple storage modes** in a single semantic model. Tables can individually be set to Import, DirectQuery, or Direct Lake.
 
@@ -353,9 +353,9 @@ flowchart LR
 
 ---
 
-## Optimize Enterprise-Scale Semantic Models
+## ⚡ Optimize Enterprise-Scale Semantic Models
 
-### Improve Query and Visual Performance
+### 🚀 Improve Query and Visual Performance
 
 | Technique | Detail |
 |---|---|
@@ -367,7 +367,7 @@ flowchart LR
 
 ---
 
-### Improve DAX Performance
+### ⚙️ Improve DAX Performance
 
 | Best Practice | Anti-Pattern |
 |---|---|
@@ -398,7 +398,7 @@ CALCULATE(
 
 ---
 
-### Configure Direct Lake
+### 🔷 Configure Direct Lake
 
 #### Architecture Overview
 
@@ -438,7 +438,7 @@ Guardrails (per SKU) define thresholds for row count per table, column count, an
 
 ---
 
-### Implement Incremental Refresh
+### 🔄 Implement Incremental Refresh
 
 Incremental refresh partitions a table by date so that only recent data is refreshed, while historical partitions are untouched.
 
@@ -462,7 +462,7 @@ Incremental refresh partitions a table by date so that only recent data is refre
 
 ---
 
-## Scenario-Based Quick Reference
+## 📋 Scenario-Based Quick Reference
 
 | # | Scenario | Answer |
 |---|---|---|

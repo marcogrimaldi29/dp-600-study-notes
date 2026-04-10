@@ -7,7 +7,7 @@ permalink: /01-maintain-data-analytics-solution/
 mermaid: true
 ---
 
-# Maintain a Data Analytics Solution
+# 🔒 Maintain a Data Analytics Solution
 {: .no_toc }
 
 > - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
@@ -24,9 +24,9 @@ Domain 1 accounts for **25–30%** of the DP-600 exam. It spans two broad skill 
 
 ---
 
-## Implement Security and Governance
+## 🛡️ Implement Security and Governance
 
-### Workspace-Level Access Controls
+### 👤 Workspace-Level Access Controls
 
 Every Fabric workspace exposes four built-in roles. The exam expects you to know the precise boundary of each role.
 
@@ -46,7 +46,7 @@ Every Fabric workspace exposes four built-in roles. The exam expects you to know
 > **Exam Caveat:** A Contributor can create and edit items inside the workspace but **cannot** share those items or publish an app. Sharing requires the Member (or Admin) role.
 {: .warning }
 
-### Item-Level Access Controls
+### 📦 Item-Level Access Controls
 
 Item-level security operates independently of workspace roles and allows granular distribution of content.
 
@@ -57,7 +57,7 @@ Item-level security operates independently of workspace roles and allows granula
 > **Exam Tip:** Build permission is the key permission that enables downstream content creation. If a question mentions allowing someone to create reports on an existing semantic model without workspace access, the answer is Build permission.
 {: .note }
 
-### Row-Level, Column-Level, Object-Level, and File-Level Security
+### 🔐 Row-Level, Column-Level, Object-Level, and File-Level Security
 
 ```mermaid
 graph TD
@@ -90,7 +90,7 @@ graph TD
 > **Exam Tip:** RLS is enforced for Viewers and users with only Read/Build permission. Workspace Admins, Members, and Contributors are **not** subject to RLS when browsing data inside the workspace — they see all rows. RLS is enforced for these roles only when they consume content through an app or a shared link.
 {: .note }
 
-### Sensitivity Labels (Microsoft Purview Information Protection)
+### 🏷️ Sensitivity Labels (Microsoft Purview Information Protection)
 
 Sensitivity labels (Confidential, Highly Confidential, General, etc.) can be applied to Fabric items — semantic models, reports, dashboards, dataflows, and lakehouses. Labels propagate downstream: if a semantic model is labeled **Confidential**, reports built on it inherit that label automatically.
 
@@ -104,7 +104,7 @@ Key points for the exam:
 > **Exam Tip:** Sensitivity labels **travel with exports**. A report labeled Highly Confidential will produce an Excel export that retains the Highly Confidential protection. This is a frequent exam topic.
 {: .note }
 
-### Endorsing Items (Promoted vs. Certified)
+### ✅ Endorsing Items (Promoted vs. Certified)
 
 Endorsement signals to consumers which items are trustworthy and authoritative.
 
@@ -121,9 +121,9 @@ Endorsement signals to consumers which items are trustworthy and authoritative.
 
 ---
 
-## Maintain the Analytics Development Lifecycle
+## 🔄 Maintain the Analytics Development Lifecycle
 
-### Version Control for a Workspace (Git Integration)
+### 🔀 Version Control for a Workspace (Git Integration)
 
 Fabric workspaces can connect to a remote Git repository in **Azure DevOps** or **GitHub**. This enables source control for items such as semantic models, reports, notebooks, and pipelines.
 
@@ -156,7 +156,7 @@ flowchart LR
 > **Exam Tip:** Git integration in Fabric currently supports connecting **one branch per workspace**. If a question asks how two developers work on different features simultaneously, the answer involves creating separate feature branches and separate workspaces (or working locally with PBIP files).
 {: .note }
 
-### Power BI Desktop Projects (.pbip)
+### 📁 Power BI Desktop Projects (.pbip)
 
 The PBIP format saves a Power BI project as a folder structure with human-readable JSON files instead of a single compressed binary file.
 
@@ -185,7 +185,7 @@ MyModel/
 > **Exam Caveat:** PBIP is the recommended format for Git-based workflows but is **not** a replacement for PBIX in all scenarios. You cannot directly upload a PBIP folder to the Power BI service as a single action the way you upload a PBIX file. PBIP is designed for developer workflows and source control.
 {: .warning }
 
-### Deployment Pipelines
+### 🚀 Deployment Pipelines
 
 Deployment pipelines provide a managed promotion path for Fabric content across environments.
 
@@ -219,7 +219,7 @@ flowchart LR
 > **Exam Caveat:** Deployment pipelines deploy **metadata only** — they do not copy data. After deploying a semantic model to Production, you still need to refresh it to load data from the production data source.
 {: .warning }
 
-### Impact Analysis of Downstream Dependencies
+### 🔍 Impact Analysis of Downstream Dependencies
 
 Fabric provides a **lineage view** for every workspace, showing how items relate to each other (data sources, dataflows, lakehouses, semantic models, reports, dashboards).
 
@@ -232,7 +232,7 @@ Fabric provides a **lineage view** for every workspace, showing how items relate
 > **Exam Tip:** Before renaming a column in a warehouse or lakehouse, always run impact analysis to identify downstream semantic models and reports that reference that column. The exam frequently tests whether you know to check lineage before making schema changes.
 {: .note }
 
-### XMLA Endpoint for Semantic Models
+### 🔌 XMLA Endpoint for Semantic Models
 
 The XMLA (XML for Analysis) endpoint exposes Power BI semantic models using the same protocol as SQL Server Analysis Services (SSAS). This enables enterprise tooling.
 
@@ -260,7 +260,7 @@ The XMLA (XML for Analysis) endpoint exposes Power BI semantic models using the 
 > **Exam Tip:** Changes made via XMLA **do not appear** in the standard Power BI Desktop round-trip. If someone modifies a model through Tabular Editor and then another developer opens the PBIX in Desktop and republishes, the XMLA changes may be overwritten. This is a governance concern the exam may test.
 {: .note }
 
-### Reusable Assets
+### ♻️ Reusable Assets
 
 #### Power BI Template Files (.pbit)
 
@@ -298,7 +298,7 @@ flowchart TD
 
 ---
 
-## Scenario-Based Quick Reference
+## 📋 Scenario-Based Quick Reference
 
 | # | Scenario | Answer |
 |---|---|---|

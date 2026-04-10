@@ -83,6 +83,8 @@ footer_content: >
 # in head_custom.html — that causes a double-init race that breaks diagrams.
 mermaid:
   version: "10.9.0"
+  options:
+    theme: "dark"
 
 # ── Callout boxes ─────────────────────────────────────────
 callouts_level: quiet
