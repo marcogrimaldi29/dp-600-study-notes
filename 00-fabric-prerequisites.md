@@ -55,7 +55,8 @@ graph TD
 
 All workloads read from and write to **OneLake**, which is the key architectural differentiator. There is no data duplication across workloads — one copy of data serves all engines.
 
-> :dart: **Exam Tip:** Questions often test whether you know which workload owns a given item. For example, a *KQL database* belongs to Real-Time Intelligence, not Data Engineering.
+> **Exam Tip:** Questions often test whether you know which workload owns a given item. For example, a *KQL database* belongs to Real-Time Intelligence, not Data Engineering.
+{: .note }
 
 ---
 
@@ -71,8 +72,8 @@ OneLake is Fabric's **single, unified data lake** for the entire tenant. Think o
 - **Hierarchical namespace** — organizes data as `onelake://<workspace>/<item>/<path>`.
 - **Automatic discovery** — every Fabric item that produces data lands in OneLake automatically.
 
-> :warning: **Exam Caveat:** Shortcuts do **not** copy data. They create a reference. If the source is deleted or access is revoked, the shortcut breaks. Expect scenario questions about this.
-
+> **Exam Caveat:** Shortcuts do **not** copy data. They create a reference. If the source is deleted or access is revoked, the shortcut breaks. Expect scenario questions about this.
+{: .warning }
 ---
 
 ## Workspaces
@@ -88,7 +89,8 @@ A workspace is the **primary container** for all Fabric items (lakehouses, wareh
 | **Contributor** | Create, edit, delete items; cannot share items or manage membership |
 | **Viewer** | View items only; cannot edit, create, or delete |
 
-> :dart: **Exam Tip:** The difference between **Member** and **Contributor** is sharing. Members can share items with other users; Contributors cannot. This distinction appears frequently in permission-related questions.
+> **Exam Tip:** The difference between **Member** and **Contributor** is sharing. Members can share items with other users; Contributors cannot. This distinction appears frequently in permission-related questions.
+{: .note }
 
 ### Capacity Assignment
 
@@ -106,7 +108,8 @@ A lakehouse combines the flexibility of a data lake with the query power of a wa
 - **Files section** — unstructured or semi-structured files (CSV, JSON, images) stored in OneLake but not registered as tables.
 - **SQL analytics endpoint** — an auto-generated, **read-only** T-SQL endpoint that lets you query Delta tables using SQL without Spark. Supports SELECT statements, views, and SQL functions but **no INSERT, UPDATE, DELETE, or DDL**.
 
-> :warning: **Exam Caveat:** The SQL analytics endpoint is **read-only**. You cannot run DML against a lakehouse via T-SQL. If a question asks you to perform T-SQL writes, the answer involves a warehouse, not a lakehouse endpoint.
+> **Exam Caveat:** The SQL analytics endpoint is **read-only**. You cannot run DML against a lakehouse via T-SQL. If a question asks you to perform T-SQL writes, the answer involves a warehouse, not a lakehouse endpoint.
+{: .warning }
 
 ### When to Use a Lakehouse
 
@@ -150,7 +153,8 @@ graph TD
 | Row/column-level security | Not via SQL endpoint | Yes |
 | Best for | Engineers, data scientists | Analysts, SQL-centric teams |
 
-> :dart: **Exam Tip:** Both lakehouse and warehouse store data as Delta Parquet in OneLake. The difference is the **engine and write path**, not the storage format.
+> **Exam Tip:** Both lakehouse and warehouse store data as Delta Parquet in OneLake. The difference is the **engine and write path**, not the storage format.
+{: .note }
 
 ---
 
@@ -176,7 +180,8 @@ Fabric compute is metered through **Capacity Units (CUs)**. Every operation — 
 - **P SKUs** — legacy Power BI Premium per-capacity. P1 maps roughly to F8. Microsoft is encouraging migration to F SKUs.
 - **Trial capacity** — free 60-day trial with F64-equivalent capacity; one trial per user.
 
-> :warning: **Exam Caveat:** F SKUs can be **paused** (stopping all compute billing), but P SKUs cannot. Also, only F64 and above (or P1 and above) support Fabric features beyond Power BI. Lower F SKUs still run all workloads but with less throughput.
+> **Exam Caveat:** F SKUs can be **paused** (stopping all compute billing), but P SKUs cannot. Also, only F64 and above (or P1 and above) support Fabric features beyond Power BI. Lower F SKUs still run all workloads but with less throughput.
+{: .warning }
 
 ---
 
@@ -196,7 +201,8 @@ Delta Lake is the default table format across all of Fabric. Understanding it is
 - **V-Order** — a Fabric-specific write-time optimization that reorders Parquet row groups for faster reads across all engines (Spark, SQL, Power BI Direct Lake). V-Order is enabled by default.
 - **Optimize Write** — dynamically coalesces small files into larger ones during write to reduce the small-file problem. Also enabled by default in Fabric.
 
-> :dart: **Exam Tip:** V-Order and Optimize Write are **enabled by default** in Fabric Spark. You do not need to turn them on. Expect questions that try to trick you into manually enabling settings that are already active.
+> **Exam Tip:** V-Order and Optimize Write are **enabled by default** in Fabric Spark. You do not need to turn them on. Expect questions that try to trick you into manually enabling settings that are already active.
+{: .note }
 
 ---
 
@@ -217,7 +223,8 @@ Power BI is both a standalone workload and the analytics layer that sits on top 
 - **Default semantic model** — every lakehouse and warehouse auto-generates a default semantic model that analysts can connect to immediately.
 - **SQL analytics endpoint** — Power BI can also use DirectQuery against a lakehouse SQL endpoint or warehouse.
 
-> :warning: **Exam Caveat:** Direct Lake is **not** the same as DirectQuery. Direct Lake reads columnar data from Parquet files in memory — it does not issue SQL queries to a source. If Direct Lake cannot load data (e.g., unsupported column type), it **falls back** to DirectQuery automatically.
+> **Exam Caveat:** Direct Lake is **not** the same as DirectQuery. Direct Lake reads columnar data from Parquet files in memory — it does not issue SQL queries to a source. If Direct Lake cannot load data (e.g., unsupported column type), it **falls back** to DirectQuery automatically.
+{: .warning }
 
 ---
 
@@ -239,7 +246,8 @@ The star schema is the recommended modeling pattern for analytical workloads in 
 | **SCD Type 2** | Keep full history | Add new row with effective/expiry dates and a current flag |
 | **SCD Type 3** | Track limited history | Add a "previous value" column alongside the current value |
 
-> :dart: **Exam Tip:** SCD Type 2 is the most commonly tested. Know that it requires **surrogate keys** (not natural keys) because the same business entity will have multiple rows.
+> **Exam Tip:** SCD Type 2 is the most commonly tested. Know that it requires **surrogate keys** (not natural keys) because the same business entity will have multiple rows.
+{: .note }
 
 ### Data Modeling Best Practices
 

@@ -79,9 +79,11 @@ flowchart TD
     VNET --> FABRIC
 ```
 
-> :warning: **Exam Caveat:** The on-premises data gateway requires installation on a local machine and must be registered in the Fabric admin portal. A **VNet data gateway** does NOT require a local installation — it runs as an Azure-managed service inside the VNet.
+> **Exam Caveat:** The on-premises data gateway requires installation on a local machine and must be registered in the Fabric admin portal. A **VNet data gateway** does NOT require a local installation — it runs as an Azure-managed service inside the VNet.
+{: .warning }
 
-> :dart: **Exam Tip:** If the question mentions a data source inside an Azure Virtual Network, the answer is **VNet data gateway** — not the on-premises gateway.
+> **Exam Tip:** If the question mentions a data source inside an Azure Virtual Network, the answer is **VNet data gateway** — not the on-premises gateway.
+{: .note }
 
 ---
 
@@ -96,7 +98,8 @@ flowchart TD
 | **Sources** | Fabric items across workspaces | Event Hubs, Eventstreams, CDC streams, custom apps |
 | **Action** | Open, connect, or create shortcuts | Subscribe, route to Eventhouse or Lakehouse |
 
-> :dart: **Exam Tip:** OneLake catalog shows items that have been **endorsed** (Promoted or Certified). Know the difference: **Promoted** = self-service endorsement by the item owner; **Certified** = organization-level endorsement requiring admin-defined permissions.
+> **Exam Tip:** OneLake catalog shows items that have been **endorsed** (Promoted or Certified). Know the difference: **Promoted** = self-service endorsement by the item owner; **Certified** = organization-level endorsement requiring admin-defined permissions.
+{: .note }
 
 ---
 
@@ -123,9 +126,11 @@ flowchart TD
 | **Shortcut** | No | Zero-copy access to ADLS, S3, GCS, other lakehouses | N/A (live pointer) | None (query at read time) |
 | **Eventstream** | No | Real-time ingestion from Event Hubs, Kafka | Continuous | Inline transforms |
 
-> :warning: **Exam Caveat:** Shortcuts do NOT copy data — they create a virtual pointer. This means shortcut data is NOT included in lakehouse OPTIMIZE or VACUUM operations. For exam questions about reducing data duplication, shortcuts are the answer.
+> **Exam Caveat:** Shortcuts do NOT copy data — they create a virtual pointer. This means shortcut data is NOT included in lakehouse OPTIMIZE or VACUUM operations. For exam questions about reducing data duplication, shortcuts are the answer.
+{: .warning }
 
-> :warning: **Exam Caveat:** Dataflow Gen2 outputs can land in a **lakehouse, warehouse, or KQL database**. Dataflow Gen1 (legacy) only targets Power BI datasets. The exam tests Gen2 specifically.
+> **Exam Caveat:** Dataflow Gen2 outputs can land in a **lakehouse, warehouse, or KQL database**. Dataflow Gen1 (legacy) only targets Power BI datasets. The exam tests Gen2 specifically.
+{: .warning }
 
 ---
 
@@ -156,9 +161,11 @@ flowchart TD
 | **Unstructured files** | Yes (Files/ folder) | No | No |
 | **Best for** | Data engineering, ML, flexible ETL | Enterprise DW, SQL-heavy BI | Real-time analytics, logs, IoT |
 
-> :dart: **Exam Tip:** If the scenario says "T-SQL stored procedures are needed for data transformation," the answer is **Warehouse** — the lakehouse SQL analytics endpoint is **read-only**.
+> **Exam Tip:** If the scenario says "T-SQL stored procedures are needed for data transformation," the answer is **Warehouse** — the lakehouse SQL analytics endpoint is **read-only**.
+{: .note }
 
-> :warning: **Exam Caveat:** A lakehouse has TWO entry points: (1) the Spark engine for read/write, and (2) the SQL analytics endpoint for read-only T-SQL. The exam frequently tests which operations are available on each.
+> **Exam Caveat:** A lakehouse has TWO entry points: (1) the Spark engine for read/write, and (2) the SQL analytics endpoint for read-only T-SQL. The exam frequently tests which operations are available on each.
+{: .warning }
 
 ---
 
@@ -173,7 +180,8 @@ flowchart TD
 | **Eventhouse to OneLake** | KQL DB tables mirrored to OneLake | Delta (Parquet) | Cross-engine queries (Spark, SQL) on real-time data |
 | **Semantic model (Direct Lake)** | Semantic model reads from OneLake | Delta (Parquet) | No import needed; near-real-time freshness |
 
-> :warning: **Exam Caveat:** OneLake availability for Eventhouse must be enabled at the **database level**. Not all KQL tables are mirrored by default — you configure which tables to expose.
+> **Exam Caveat:** OneLake availability for Eventhouse must be enabled at the **database level**. Not all KQL tables are mirrored by default — you configure which tables to expose.
+{: .warning }
 
 ---
 
@@ -211,7 +219,8 @@ BEGIN
 END;
 ```
 
-> :dart: **Exam Tip:** The lakehouse SQL analytics endpoint auto-generates views for each Delta table. You CAN create custom views on top of these, but you CANNOT create stored procedures or functions.
+> **Exam Tip:** The lakehouse SQL analytics endpoint auto-generates views for each Delta table. You CAN create custom views on top of these, but you CANNOT create stored procedures or functions.
+{: .note }
 
 ---
 
@@ -315,9 +324,11 @@ CREATE TABLE dbo.FactSales (
 );
 ```
 
-> :warning: **Exam Caveat:** Fabric Warehouse supports `IDENTITY` columns for surrogate keys, but the lakehouse (Delta tables via Spark) does NOT. In lakehouses, use `monotonically_increasing_id()` in PySpark or a manual key generation approach.
+> **Exam Caveat:** Fabric Warehouse supports `IDENTITY` columns for surrogate keys, but the lakehouse (Delta tables via Spark) does NOT. In lakehouses, use `monotonically_increasing_id()` in PySpark or a manual key generation approach.
+{: .warning }
 
-> :dart: **Exam Tip:** The exam tests why surrogate keys are preferred over natural keys: (1) they are stable even when business keys change, (2) they are integers which join faster, (3) they handle unknown/missing dimension members (e.g., key = -1).
+> **Exam Tip:** The exam tests why surrogate keys are preferred over natural keys: (1) they are stable even when business keys change, (2) they are integers which join faster, (3) they handle unknown/missing dimension members (e.g., key = -1).
+{: .note }
 
 ---
 
@@ -333,7 +344,8 @@ Denormalization flattens related tables into fewer, wider tables to improve read
 | **Read performance** | Slower (many JOINs) | Faster (pre-joined) |
 | **Best for** | OLTP / transactional systems | OLAP / analytics & reporting |
 
-> :dart: **Exam Tip:** In Fabric, the Gold layer of a medallion architecture is typically **denormalized** into star schema fact and dimension tables. If a question asks about optimizing for reporting, denormalization is the answer.
+> **Exam Tip:** In Fabric, the Gold layer of a medallion architecture is typically **denormalized** into star schema fact and dimension tables. If a question asks about optimizing for reporting, denormalization is the answer.
+{: .note }
 
 ---
 
@@ -363,7 +375,8 @@ JOIN dbo.DimDate d ON f.DateKey = d.DateKey
 GROUP BY YEAR(OrderDate), MONTH(OrderDate), ProductCategory;
 ```
 
-> :warning: **Exam Caveat:** Fabric Warehouse supports **materialized views** as a preview feature. They are auto-refreshed when underlying data changes. Do not confuse with standard views, which are computed at query time.
+> **Exam Caveat:** Fabric Warehouse supports **materialized views** as a preview feature. They are auto-refreshed when underlying data changes. Do not confuse with standard views, which are computed at query time.
+{: .warning }
 
 ---
 
@@ -393,7 +406,8 @@ LEFT JOIN dbo.FactSales f ON c.CustomerKey = f.CustomerKey
 WHERE f.CustomerKey IS NULL;
 ```
 
-> :dart: **Exam Tip:** In Dataflow Gen2, a **Left Anti** join is available as a native merge type — this is commonly tested. It returns rows from the left table that have NO match in the right table.
+> **Exam Tip:** In Dataflow Gen2, a **Left Anti** join is available as a native merge type — this is commonly tested. It returns rows from the left table that have NO match in the right table.
+{: .note }
 
 ---
 
@@ -437,7 +451,8 @@ FROM dbo.DimCustomer;
 | **PySpark** | `df.withColumn("col", col("col").cast("integer"))` |
 | **DAX** (calculated column) | `FORMAT()`, `VALUE()`, `INT()` |
 
-> :warning: **Exam Caveat:** In Fabric Warehouse, `CONVERT` with style codes is supported for date/string conversions. The exam may test specific style codes (e.g., `103` = dd/mm/yyyy, `120` = yyyy-mm-dd hh:mi:ss).
+> **Exam Caveat:** In Fabric Warehouse, `CONVERT` with style codes is supported for date/string conversions. The exam may test specific style codes (e.g., `103` = dd/mm/yyyy, `120` = yyyy-mm-dd hh:mi:ss).
+{: .warning }
 
 ---
 
@@ -452,7 +467,8 @@ Filtering removes unwanted rows early in the pipeline to reduce processing volum
 | **Transform** | SQL WHERE, PySpark .filter() | `df.filter(col("status") == "Active")` |
 | **Semantic model** | RLS / role filters | `[Region] = USERPRINCIPALNAME()` |
 
-> :dart: **Exam Tip:** **Query folding** in Dataflow Gen2 is critical — if a step folds, it is pushed to the source database and runs there (much faster). Exam questions test whether specific Power Query steps break folding.
+> **Exam Tip:** **Query folding** in Dataflow Gen2 is critical — if a step folds, it is pushed to the source database and runs there (much faster). Exam questions test whether specific Power Query steps break folding.
+{: .note }
 
 ---
 
@@ -468,7 +484,8 @@ Key capabilities:
 - Generates T-SQL under the hood — you can switch to SQL view to see the query
 - Supports GROUP BY, ORDER BY, TOP, and WHERE clauses visually
 
-> :dart: **Exam Tip:** The Visual Query Editor is the correct answer when the scenario describes a **business analyst** or **citizen developer** who needs to query lakehouse or warehouse data without writing SQL.
+> **Exam Tip:** The Visual Query Editor is the correct answer when the scenario describes a **business analyst** or **citizen developer** who needs to query lakehouse or warehouse data without writing SQL.
+{: .note }
 
 ---
 
@@ -509,7 +526,8 @@ GROUP BY p.ProductName
 ORDER BY TotalSales DESC;
 ```
 
-> :warning: **Exam Caveat:** The SQL analytics endpoint (lakehouse) supports **read-only** T-SQL: SELECT, CREATE VIEW, CREATE FUNCTION (inline TVF). It does NOT support INSERT, UPDATE, DELETE, CREATE TABLE, or stored procedures.
+> **Exam Caveat:** The SQL analytics endpoint (lakehouse) supports **read-only** T-SQL: SELECT, CREATE VIEW, CREATE FUNCTION (inline TVF). It does NOT support INSERT, UPDATE, DELETE, CREATE TABLE, or stored procedures.
+{: .warning }
 
 ---
 
@@ -558,9 +576,11 @@ StormEvents
 | **Count** | `COUNT(*)` | `count()` |
 | **Time bucket** | `DATEPART(hour, col)` | `bin(col, 1h)` |
 
-> :dart: **Exam Tip:** KQL uses a **pipe-based** syntax where each operator filters/transforms the result of the previous step. The exam tests basic KQL operators: `where`, `project`, `summarize`, `order by`, `take`, `bin()`, `count()`, `sum()`, `avg()`.
+> **Exam Tip:** KQL uses a **pipe-based** syntax where each operator filters/transforms the result of the previous step. The exam tests basic KQL operators: `where`, `project`, `summarize`, `order by`, `take`, `bin()`, `count()`, `sum()`, `avg()`.
+{: .note }
 
-> :warning: **Exam Caveat:** KQL databases are optimized for **append-heavy, time-series data** (logs, IoT telemetry, clickstreams). If the scenario involves real-time or near-real-time analytics on event data, the answer is Eventhouse + KQL.
+> **Exam Caveat:** KQL databases are optimized for **append-heavy, time-series data** (logs, IoT telemetry, clickstreams). If the scenario involves real-time or near-real-time analytics on event data, the answer is Eventhouse + KQL.
+{: .warning }
 
 ---
 
@@ -622,9 +642,11 @@ TOPN(
 | `TOPN` | Return top N rows | Top 10 products by sales |
 | `ALL` / `ALLEXCEPT` | Remove filters from columns/tables | Override slicer context |
 
-> :warning: **Exam Caveat:** `SUMMARIZECOLUMNS` is the recommended function for DAX queries (replaces the older `SUMMARIZE` + `ADDCOLUMNS` pattern). The exam strongly favors `SUMMARIZECOLUMNS` for grouping and aggregating.
+> **Exam Caveat:** `SUMMARIZECOLUMNS` is the recommended function for DAX queries (replaces the older `SUMMARIZE` + `ADDCOLUMNS` pattern). The exam strongly favors `SUMMARIZECOLUMNS` for grouping and aggregating.
+{: .warning }
 
-> :dart: **Exam Tip:** `CALCULATETABLE` modifies filter context for an entire table expression, while `FILTER` iterates row by row. For simple equality filters, `CALCULATETABLE` is more efficient. For complex conditions (e.g., measures > threshold), `FILTER` is needed.
+> **Exam Tip:** `CALCULATETABLE` modifies filter context for an entire table expression, while `FILTER` iterates row by row. For simple equality filters, `CALCULATETABLE` is more efficient. For complex conditions (e.g., measures > threshold), `FILTER` is needed.
+{: .note }
 
 ---
 
@@ -708,7 +730,8 @@ flowchart LR
 
 ---
 
-> :dart: **Final Exam Tip:** This domain covers nearly half the exam. Prioritize the **data store selection matrix**, **star schema design**, **ingestion method comparison**, and **basic SQL/KQL/DAX query patterns**. These appear in nearly every practice test.
+> **Final Exam Tip:** This domain covers nearly half the exam. Prioritize the **data store selection matrix**, **star schema design**, **ingestion method comparison**, and **basic SQL/KQL/DAX query patterns**. These appear in nearly every practice test.
+{: .note }
 
 ---
 
