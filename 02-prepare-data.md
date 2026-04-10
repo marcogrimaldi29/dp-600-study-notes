@@ -3,6 +3,7 @@ layout: default
 title: "02 — Prepare Data"
 nav_order: 4
 description: "Domain 2 (45–50%) — Data connections, OneLake catalog, star schemas, data transformations, SQL, KQL, DAX queries for the DP-600 exam."
+permalink: /02-prepare-data/
 mermaid: true
 ---
 
@@ -708,3 +709,11 @@ flowchart LR
 ---
 
 > :dart: **Final Exam Tip:** This domain covers nearly half the exam. Prioritize the **data store selection matrix**, **star schema design**, **ingestion method comparison**, and **basic SQL/KQL/DAX query patterns**. These appear in nearly every practice test.
+
+---
+
+*These notes cover the "Prepare Data" domain of the DP-600 exam. For full coverage, pair these notes with hands-on practice in a Fabric trial or capacity environment.*
+
+---
+
+[← 01 — Maintain a Data Analytics Solution](/dp-600-study-notes/01-maintain-data-analytics-solution/) | [03 — Implement and Manage Semantic Models →](/dp-600-study-notes/03-implement-manage-semantic-models/)

@@ -3,6 +3,7 @@ layout: default
 title: "01 — Maintain a Data Analytics Solution"
 nav_order: 3
 description: "Domain 1 (25–30%) — Security & governance, version control, deployment pipelines, XMLA endpoint, and reusable assets for the DP-600 exam."
+permalink: /01-maintain-data-analytics-solution/
 mermaid: true
 ---
 
@@ -317,3 +318,7 @@ flowchart TD
 ---
 
 *These notes cover the "Maintain a data analytics solution" domain of the DP-600 exam. For full coverage, pair these notes with hands-on practice in a Fabric trial or capacity environment.*
+
+---
+
+[← 00 — Fabric Prerequisites](/dp-600-study-notes/00-fabric-prerequisites/) | [02 — Prepare Data →](/dp-600-study-notes/02-prepare-data/)

@@ -3,6 +3,7 @@ layout: default
 title: "00 — Fabric Prerequisites"
 nav_order: 2
 description: "Microsoft Fabric fundamentals — OneLake, workspaces, lakehouses, warehouses, capacities, Delta Lake, and core analytics concepts needed for the DP-600 exam."
+permalink: /00-fabric-prerequisites/
 mermaid: true
 ---
 
@@ -264,3 +265,7 @@ The star schema is the recommended modeling pattern for analytical workloads in 
 | Stream IoT events and query with KQL | Real-Time Intelligence | Eventstreams and KQL databases handle streaming data |
 | Need cross-database SQL joins across items | Warehouse | Cross-database queries with three-part naming |
 | Store unstructured images alongside tabular data | Lakehouse (Files section) | Files section holds any format; tables hold Delta only |
+
+---
+
+[← Back to Home](/dp-600-study-notes/) | [01 — Maintain a Data Analytics Solution →](/dp-600-study-notes/01-maintain-data-analytics-solution/)
