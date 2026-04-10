@@ -41,7 +41,8 @@ Last-minute review sheet for the DP-600 Microsoft Fabric Analytics Engineer Asso
 | Max scheduled refreshes per day (Pro) | **8** |
 | Max scheduled refreshes per day (Premium) | **48** |
 
-> :dart: **Exam Tip:** SKU-specific guardrails (row limits, table counts) are the most common "trick number" questions. Know at least the F2 and F64 tiers.
+> **Exam Tip:** SKU-specific guardrails (row limits, table counts) are the most common "trick number" questions. Know at least the F2 and F64 tiers.
+{: .note }
 
 ---
 
@@ -70,7 +71,8 @@ flowchart TD
     H -- No --> I["**DirectQuery**<br/>or Composite"]
 ```
 
-> :warning: **Exam Caveat:** Direct Lake is **only** available for Delta tables stored in OneLake (Lakehouse or Warehouse). If data is in Azure SQL or Synapse, you cannot use Direct Lake.
+> **Exam Caveat:** Direct Lake is **only** available for Delta tables stored in OneLake (Lakehouse or Warehouse). If data is in Azure SQL or Synapse, you cannot use Direct Lake.
+{: .warning }
 
 ---
 
@@ -119,7 +121,8 @@ flowchart TD
 | `DATESYTD(dateCol)` | Returns dates from start of year to current date |
 | `PARALLELPERIOD(dateCol, -1, QUARTER)` | Full parallel period |
 
-> :warning: **Exam Caveat:** Time intelligence functions require a **contiguous Date table** marked as a date table. Gaps in dates break these functions.
+> **Exam Caveat:** Time intelligence functions require a **contiguous Date table** marked as a date table. Gaps in dates break these functions.
+{: .warning }
 
 ### Windowing Functions (New in Fabric)
 
@@ -147,7 +150,8 @@ CALCULATE(
 )
 ```
 
-> :dart: **Exam Tip:** `USERELATIONSHIP` activates an **inactive** relationship for that measure only. The relationship must already exist in the model as inactive.
+> **Exam Tip:** `USERELATIONSHIP` activates an **inactive** relationship for that measure only. The relationship must already exist in the model as inactive.
+{: .note }
 
 ---
 
@@ -173,7 +177,8 @@ flowchart LR
     style C fill:#1a3a5c,stroke:#4a9eff
 ```
 
-> :warning: **Exam Caveat:** RLS is defined in the **semantic model**, NOT in the Lakehouse or Warehouse. Users with Admin/Member roles **bypass** RLS when browsing data in the service.
+> **Exam Caveat:** RLS is defined in the **semantic model**, NOT in the Lakehouse or Warehouse. Users with Admin/Member roles **bypass** RLS when browsing data in the service.
+{: .warning }
 
 ---
 
@@ -189,7 +194,8 @@ flowchart LR
 | **SQL endpoint?** | Yes (read-only auto-generated) | Native | No (KQL only) | No (KQL only) |
 | **Direct Lake support** | Yes | Yes | No | No |
 
-> :dart: **Exam Tip:** If the question mentions **T-SQL stored procedures** or **views with complex joins**, the answer is **Warehouse**. If it mentions **streaming** or **IoT telemetry**, think **Eventhouse / KQL Database**.
+> **Exam Tip:** If the question mentions **T-SQL stored procedures** or **views with complex joins**, the answer is **Warehouse**. If it mentions **streaming** or **IoT telemetry**, think **Eventhouse / KQL Database**.
+{: .note }
 
 ---
 
@@ -204,7 +210,8 @@ flowchart LR
 | **Compute** | Fabric Dataflow compute | Spark pool | Pipeline IR | None |
 | **Writes Delta?** | Yes (to Lakehouse) | Yes | Yes | No (reads in-place) |
 
-> :warning: **Exam Caveat:** **Shortcuts** do not copy data — they create a virtualized reference. Data stays in the source (ADLS, S3, or another OneLake location). This is critical for questions about data residency and latency.
+> **Exam Caveat:** **Shortcuts** do not copy data — they create a virtualized reference. Data stays in the source (ADLS, S3, or another OneLake location). This is critical for questions about data residency and latency.
+{: .warning }
 
 ---
 
@@ -235,7 +242,8 @@ flowchart TD
     DQ --> R
 ```
 
-> :warning: **Exam Caveat:** Direct Lake **does not import data** into the model. It reads Parquet files directly from OneLake into memory on demand. Framing is NOT the same as a refresh — it only updates the Delta log pointer.
+> **Exam Caveat:** Direct Lake **does not import data** into the model. It reads Parquet files directly from OneLake into memory on demand. Framing is NOT the same as a refresh — it only updates the Delta log pointer.
+{: .warning }
 
 ---
 
@@ -262,7 +270,8 @@ flowchart TD
 19. **`USERELATIONSHIP`** only works with **inactive** relationships — you cannot reference a relationship that does not exist.
 20. **Large format datasets** (over 10 GB) require Premium or Fabric capacity — Pro licenses are capped.
 
-> :dart: **Exam Tip:** When two answers both seem correct, ask yourself: "Where is this configured?" The exam loves testing whether something is set in the semantic model, the workspace, the data source, or the admin portal.
+> **Exam Tip:** When two answers both seem correct, ask yourself: "Where is this configured?" The exam loves testing whether something is set in the semantic model, the workspace, the data source, or the admin portal.
+{: .note }
 
 ---
 
@@ -302,7 +311,8 @@ flowchart TD
 
 ---
 
-> :dart: **Exam Tip:** The DP-600 is heavily weighted toward **Domain 2 (Prepare Data)** at 45-50%. Spend the most study time on data ingestion patterns, star schema design, and query languages.
+> **Exam Tip:** The DP-600 is heavily weighted toward **Domain 2 (Prepare Data)** at 45-50%. Spend the most study time on data ingestion patterns, star schema design, and query languages.
+{: .note }
 
 ---
 
