@@ -10,6 +10,9 @@ mermaid: true
 # Fabric Prerequisites
 {: .no_toc }
 
+> - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
+> - 📁 [← Back to Home](/dp-600-study-notes/)
+
 Background knowledge you need before diving into DP-600 exam topics. This page covers the foundational Fabric concepts that every Analytics Engineer question assumes you already understand.
 
 <details open markdown="block">

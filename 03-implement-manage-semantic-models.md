@@ -10,6 +10,9 @@ mermaid: true
 # Implement & Manage Semantic Models
 {: .no_toc }
 
+> - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
+> - 📁 [← Back to Home](/dp-600-study-notes/)
+
 Domain 3 accounts for **25–30 %** of the DP-600 exam. It spans semantic-model design (storage modes, star schemas, relationships, DAX, calculation groups, composite models) and enterprise-scale optimization (DAX tuning, Direct Lake configuration, incremental refresh).
 
 <details open markdown="block">

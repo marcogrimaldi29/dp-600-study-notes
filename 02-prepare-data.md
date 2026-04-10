@@ -10,10 +10,10 @@ mermaid: true
 # 02 — Prepare Data
 {: .no_toc }
 
-> **Official Exam Weight: 45–50%** — This is the highest-weighted domain on the DP-600 exam.
-> Back to Home
+> - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
+> - 📁 [← Back to Home](/dp-600-study-notes/)
 
----
+Domain 2 is the heaviest weighted on the DP-600 exam, covering **45–50%** of the questions. This domain tests your ability to connect to data sources, discover data using OneLake catalog, choose appropriate data stores (lakehouse, warehouse, eventhouse), and perform data transformations using SQL, KQL, and DAX.
 
 <details open markdown="block">
   <summary>Table of contents</summary>
