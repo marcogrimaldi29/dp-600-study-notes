@@ -7,7 +7,7 @@ permalink: /02-prepare-data/
 mermaid: true
 ---
 
-# 02 — Prepare Data
+# 🔄 02 — Prepare Data
 {: .no_toc }
 
 > - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
@@ -24,7 +24,7 @@ Domain 2 is the heaviest weighted on the DP-600 exam, covering **45–50%** of t
 
 ---
 
-## Domain Overview
+## 📊 Domain Overview
 
 ```mermaid
 mindmap
@@ -55,9 +55,9 @@ mindmap
 
 ---
 
-## 2.1 Get Data
+## 📥 2.1 Get Data
 
-### Create a Data Connection
+### 🔌 Create a Data Connection
 
 Data connections in Microsoft Fabric link workspaces to external or internal sources. The two primary components are **connectors** and **gateways**.
 
@@ -87,7 +87,7 @@ flowchart TD
 
 ---
 
-### Discover Data by Using OneLake Catalog and Real-Time Hub
+### 🔎 Discover Data by Using OneLake Catalog and Real-Time Hub
 
 **OneLake catalog** (formerly OneLake data hub) is the centralized discovery experience where users browse, search, and access endorsed data items across the Fabric tenant.
 
@@ -103,7 +103,7 @@ flowchart TD
 
 ---
 
-### Ingest or Access Data as Needed
+### 📤 Ingest or Access Data as Needed
 
 ```mermaid
 flowchart TD
@@ -134,7 +134,7 @@ flowchart TD
 
 ---
 
-### Choose Between Different Data Stores
+### ⚖️ Choose Between Different Data Stores
 
 This is a critical decision tree tested heavily on the exam.
 
@@ -169,7 +169,7 @@ flowchart TD
 
 ---
 
-### Implement OneLake Integration for Eventhouse and Semantic Models
+### 🔗 Implement OneLake Integration for Eventhouse and Semantic Models
 
 **Eventhouse OneLake integration** allows KQL database data to be mirrored to OneLake in Delta format, making it queryable by Spark and SQL engines.
 
@@ -185,9 +185,9 @@ flowchart TD
 
 ---
 
-## 2.2 Transform Data
+## ⚙️ 2.2 Transform Data
 
-### Create Views, Functions, and Stored Procedures
+### 🧱 Create Views, Functions, and Stored Procedures
 
 These objects are available in the **Warehouse** and, for views only, in the **SQL analytics endpoint** (lakehouse).
 
@@ -224,7 +224,7 @@ END;
 
 ---
 
-### Enrich Data by Adding New Columns or Tables
+### ➕ Enrich Data by Adding New Columns or Tables
 
 Enrichment adds calculated or derived information to existing datasets.
 
@@ -238,7 +238,7 @@ Enrichment adds calculated or derived information to existing datasets.
 
 ---
 
-### Implement a Star Schema for a Lakehouse or Warehouse
+### ⭐ Implement a Star Schema for a Lakehouse or Warehouse
 
 The star schema is the **recommended modeling pattern** for analytics in Fabric. It optimizes query performance and simplifies semantic model design.
 
@@ -332,7 +332,7 @@ CREATE TABLE dbo.FactSales (
 
 ---
 
-### Denormalize Data
+### 📋 Denormalize Data
 
 Denormalization flattens related tables into fewer, wider tables to improve read performance.
 
@@ -349,7 +349,7 @@ Denormalization flattens related tables into fewer, wider tables to improve read
 
 ---
 
-### Aggregate Data
+### 📊 Aggregate Data
 
 Pre-aggregation reduces data volume and speeds up queries for dashboards and reports.
 
@@ -380,7 +380,7 @@ GROUP BY YEAR(OrderDate), MONTH(OrderDate), ProductCategory;
 
 ---
 
-### Merge or Join Data
+### 🔀 Merge or Join Data
 
 #### Join Types
 
@@ -411,7 +411,7 @@ WHERE f.CustomerKey IS NULL;
 
 ---
 
-### Identify and Resolve Duplicate Data, Missing Data, or Null Values
+### 🧹 Identify and Resolve Duplicate Data, Missing Data, or Null Values
 
 | Issue | Detection | Resolution |
 |-------|-----------|------------|
@@ -442,7 +442,7 @@ FROM dbo.DimCustomer;
 
 ---
 
-### Convert Column Data Types
+### 🔄 Convert Column Data Types
 
 | Tool | Syntax |
 |------|--------|
@@ -456,7 +456,7 @@ FROM dbo.DimCustomer;
 
 ---
 
-### Filter Data
+### 🔽 Filter Data
 
 Filtering removes unwanted rows early in the pipeline to reduce processing volume and improve performance.
 
@@ -472,9 +472,9 @@ Filtering removes unwanted rows early in the pipeline to reduce processing volum
 
 ---
 
-## 2.3 Query and Analyze Data
+## 🔍 2.3 Query and Analyze Data
 
-### Select, Filter, and Aggregate Data by Using the Visual Query Editor
+### 🖱️ Select, Filter, and Aggregate Data by Using the Visual Query Editor
 
 The **Visual Query Editor** is a drag-and-drop interface available in the lakehouse SQL analytics endpoint and Warehouse.
 
@@ -489,7 +489,7 @@ Key capabilities:
 
 ---
 
-### Select, Filter, and Aggregate Data by Using SQL
+### 💾 Select, Filter, and Aggregate Data by Using SQL
 
 T-SQL is the primary query language for Fabric Warehouse and the SQL analytics endpoint.
 
@@ -531,7 +531,7 @@ ORDER BY TotalSales DESC;
 
 ---
 
-### Select, Filter, and Aggregate Data by Using KQL
+### 🔍 Select, Filter, and Aggregate Data by Using KQL
 
 KQL (Kusto Query Language) is used in **Eventhouse / KQL databases** for real-time and time-series analytics.
 
@@ -584,7 +584,7 @@ StormEvents
 
 ---
 
-### Select, Filter, and Aggregate Data by Using DAX
+### 📐 Select, Filter, and Aggregate Data by Using DAX
 
 DAX queries use the `EVALUATE` statement and are executed in tools like DAX Studio, SSMS (via XMLA endpoint), or Fabric notebook.
 
@@ -650,7 +650,7 @@ TOPN(
 
 ---
 
-## End-to-End Data Flow
+## 🔗 End-to-End Data Flow
 
 ```mermaid
 flowchart LR
@@ -701,7 +701,7 @@ flowchart LR
 
 ---
 
-## Scenario-Based Quick Reference
+## 📋 Scenario-Based Quick Reference
 
 | # | Scenario | Answer |
 |---|----------|--------|

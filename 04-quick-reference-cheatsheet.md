@@ -7,7 +7,7 @@ permalink: /04-quick-reference-cheatsheet/
 mermaid: true
 ---
 
-# Quick Reference Cheatsheet
+# ⚡ Quick Reference Cheatsheet
 {: .no_toc }
 
 > - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
@@ -25,7 +25,7 @@ Last-minute review sheet for the DP-600 Microsoft Fabric Analytics Engineer Asso
 
 ---
 
-## 1 — Key Numbers & Limits
+## 🔢 1 — Key Numbers & Limits
 
 | Item | Value / Threshold |
 |------|-------------------|
@@ -49,7 +49,7 @@ Last-minute review sheet for the DP-600 Microsoft Fabric Analytics Engineer Asso
 
 ---
 
-## 2 — Storage Mode Decision Matrix
+## 💾 2 — Storage Mode Decision Matrix
 
 | Criteria | Import | DirectQuery | Direct Lake | Composite |
 |----------|--------|-------------|-------------|-----------|
@@ -79,9 +79,9 @@ flowchart TD
 
 ---
 
-## 3 — DAX Quick Reference
+## 📐 3 — DAX Quick Reference
 
-### CALCULATE & Filter Modifiers
+### 🔧 CALCULATE & Filter Modifiers
 
 | Pattern | What It Does | Example |
 |---------|-------------|---------|
@@ -91,7 +91,7 @@ flowchart TD
 | `REMOVEFILTERS(col)` | Alias for ALL — clearer intent | `CALCULATE(…, REMOVEFILTERS(Date[Year]))` |
 | `KEEPFILTERS(filter)` | Adds filter without overriding existing context | `CALCULATE(…, KEEPFILTERS(Product[Color]="Red"))` |
 
-### Iterators
+### 🔄 Iterators
 
 | Function | Purpose |
 |----------|---------|
@@ -101,7 +101,7 @@ flowchart TD
 | `RANKX(table, expr)` | Rank each row by expression |
 | `MAXX / MINX` | Row-by-row max/min |
 
-### Table Functions
+### 📊 Table Functions
 
 | Function | Purpose |
 |----------|---------|
@@ -113,7 +113,7 @@ flowchart TD
 | `DISTINCT(col)` | Unique values of a column |
 | `VALUES(col)` | Unique values including blank row from broken relationships |
 
-### Time Intelligence
+### ⏰ Time Intelligence
 
 | Function | Purpose |
 |----------|---------|
@@ -127,7 +127,7 @@ flowchart TD
 > **Exam Caveat:** Time intelligence functions require a **contiguous Date table** marked as a date table. Gaps in dates break these functions.
 {: .warning }
 
-### Windowing Functions (New in Fabric)
+### 🪟 Windowing Functions (New in Fabric)
 
 | Function | Purpose |
 |----------|---------|
@@ -135,7 +135,7 @@ flowchart TD
 | `WINDOW(from, to, relation, orderBy)` | Define a sliding window |
 | `INDEX(n, relation, orderBy)` | Access the Nth row |
 
-### Variables Pattern & USERELATIONSHIP
+### 📌 Variables Pattern & USERELATIONSHIP
 
 ```dax
 -- VAR / RETURN pattern (always prefer for readability & performance)
@@ -158,7 +158,7 @@ CALCULATE(
 
 ---
 
-## 4 — Security Layers Cheatsheet
+## 🔒 4 — Security Layers Cheatsheet
 
 | Layer | RLS (Row-Level Security) | CLS (Column-Level Security) | OLS (Object-Level Security) |
 |-------|--------------------------|-----------------------------|-----------------------------|
@@ -185,7 +185,7 @@ flowchart LR
 
 ---
 
-## 5 — Data Store Selection
+## 🗄️ 5 — Data Store Selection
 
 | Criteria | Lakehouse | Warehouse | KQL Database | Eventhouse |
 |----------|-----------|-----------|--------------|------------|
@@ -202,7 +202,7 @@ flowchart LR
 
 ---
 
-## 6 — Ingestion Method Selection
+## 📥 6 — Ingestion Method Selection
 
 | Criteria | Dataflow Gen2 | Notebook (Spark) | Copy Activity (Pipeline) | Shortcut |
 |----------|---------------|-------------------|--------------------------|----------|
@@ -218,9 +218,9 @@ flowchart LR
 
 ---
 
-## 7 — Direct Lake Deep Dive
+## 🔷 7 — Direct Lake Deep Dive
 
-### Key Facts
+### 📌 Key Facts
 
 | Fact | Detail |
 |------|--------|
@@ -250,7 +250,7 @@ flowchart TD
 
 ---
 
-## 8 — Common Exam Traps
+## ⚠️ 8 — Common Exam Traps
 
 1. **RLS is defined in the semantic model**, not in the Lakehouse, Warehouse, or data source.
 2. **Direct Lake requires Delta tables in OneLake** — no CSV, no Azure SQL, no external Parquet.
@@ -278,9 +278,9 @@ flowchart TD
 
 ---
 
-## 9 — Pre-Exam Checklist
+## ✅ 9 — Pre-Exam Checklist
 
-### Domain 1 — Maintain a Data Analytics Solution (25-30%)
+### 🔒 Domain 1 — Maintain a Data Analytics Solution (25-30%)
 
 - [ ] I can explain the four workspace roles and their permissions
 - [ ] I know how deployment pipelines compare content across stages
@@ -290,7 +290,7 @@ flowchart TD
 - [ ] I can describe the difference between RLS, CLS, and OLS and where each is configured
 - [ ] I understand how workspace Admin/Member roles interact with RLS
 
-### Domain 2 — Prepare Data (45-50%)
+### 🔄 Domain 2 — Prepare Data (45-50%)
 
 - [ ] I can choose between Lakehouse, Warehouse, KQL Database, and Eventhouse
 - [ ] I know when to use Dataflow Gen2 vs. Notebook vs. Pipeline Copy Activity vs. Shortcut
@@ -300,7 +300,7 @@ flowchart TD
 - [ ] I know the incremental refresh parameter pattern (`RangeStart` / `RangeEnd`)
 - [ ] I can describe Delta Lake format, V-Order, and their role in Direct Lake
 
-### Domain 3 — Implement and Manage Semantic Models (25-30%)
+### 📐 Domain 3 — Implement and Manage Semantic Models (25-30%)
 
 - [ ] I can choose between Import, DirectQuery, Direct Lake, and Composite storage modes
 - [ ] I know the Direct Lake guardrails, framing process, and fallback behavior

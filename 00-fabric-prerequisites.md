@@ -7,7 +7,7 @@ permalink: /00-fabric-prerequisites/
 mermaid: true
 ---
 
-# Fabric Prerequisites
+# 📘 Fabric Prerequisites
 {: .no_toc }
 
 > - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
@@ -24,11 +24,11 @@ Background knowledge you need before diving into DP-600 exam topics. This page c
 
 ---
 
-## Microsoft Fabric Architecture Overview
+## 🏗️ Microsoft Fabric Architecture Overview
 
 Microsoft Fabric is a **SaaS analytics platform** that unifies data engineering, data warehousing, data science, real-time intelligence, data integration, and business intelligence into a single product. Instead of stitching together separate Azure services, Fabric provides one integrated experience built on a shared foundation.
 
-### Workloads at a Glance
+### 📌 Workloads at a Glance
 
 | Workload | Purpose |
 |---|---|
@@ -63,11 +63,11 @@ All workloads read from and write to **OneLake**, which is the key architectural
 
 ---
 
-## OneLake
+## 🗄️ OneLake
 
 OneLake is Fabric's **single, unified data lake** for the entire tenant. Think of it as "OneDrive for data." Under the hood it runs on **Azure Data Lake Storage Gen2** with a hierarchical namespace enabled.
 
-### Key Characteristics
+### 💎 Key Characteristics
 
 - **One copy of data** — all Fabric workloads access the same physical files, eliminating silos and redundant copies.
 - **Delta Parquet format** — tables are stored as Delta Lake (Parquet files plus a `_delta_log` transaction log).
@@ -79,11 +79,11 @@ OneLake is Fabric's **single, unified data lake** for the entire tenant. Think o
 {: .warning }
 ---
 
-## Workspaces
+## 📂 Workspaces
 
 A workspace is the **primary container** for all Fabric items (lakehouses, warehouses, notebooks, reports, pipelines, etc.). Every workspace is assigned to exactly one capacity.
 
-### Workspace Roles
+### 👤 Workspace Roles
 
 | Role | Permissions |
 |---|---|
@@ -95,17 +95,17 @@ A workspace is the **primary container** for all Fabric items (lakehouses, wareh
 > **Exam Tip:** The difference between **Member** and **Contributor** is sharing. Members can share items with other users; Contributors cannot. This distinction appears frequently in permission-related questions.
 {: .note }
 
-### Capacity Assignment
+### 🔗 Capacity Assignment
 
 Every workspace must be backed by a capacity (or trial/PPU for Power BI-only workloads). Workspace admins assign the workspace to a specific capacity, which determines available compute and the SKU feature set.
 
 ---
 
-## Lakehouses
+## 🏠 Lakehouses
 
 A lakehouse combines the flexibility of a data lake with the query power of a warehouse. It is the central storage item for Data Engineering workloads.
 
-### Anatomy of a Lakehouse
+### 🧩 Anatomy of a Lakehouse
 
 - **Tables section** — managed Delta Lake tables queryable via Spark and the SQL analytics endpoint.
 - **Files section** — unstructured or semi-structured files (CSV, JSON, images) stored in OneLake but not registered as tables.
@@ -114,7 +114,7 @@ A lakehouse combines the flexibility of a data lake with the query power of a wa
 > **Exam Caveat:** The SQL analytics endpoint is **read-only**. You cannot run DML against a lakehouse via T-SQL. If a question asks you to perform T-SQL writes, the answer involves a warehouse, not a lakehouse endpoint.
 {: .warning }
 
-### When to Use a Lakehouse
+### ✅ When to Use a Lakehouse
 
 - Unstructured or semi-structured data that needs flexible exploration.
 - Spark-based data engineering transformations (PySpark, Spark SQL).
@@ -123,11 +123,11 @@ A lakehouse combines the flexibility of a data lake with the query power of a wa
 
 ---
 
-## Warehouses
+## 🏢 Warehouses
 
 A Fabric warehouse is a **full relational data warehouse** with complete T-SQL DDL and DML support. Data is still stored as Delta Parquet in OneLake, but the engine provides a traditional SQL experience.
 
-### Key Capabilities
+### 🔧 Key Capabilities
 
 - **Full DML** — INSERT, UPDATE, DELETE, MERGE, COPY INTO.
 - **Full DDL** — CREATE TABLE, ALTER TABLE, CREATE VIEW, CREATE SCHEMA, stored procedures.
@@ -145,7 +145,7 @@ graph TD
     Q3 -->|No| LH
 ```
 
-### Lakehouse vs Warehouse Comparison
+### ⚖️ Lakehouse vs Warehouse Comparison
 
 | Feature | Lakehouse | Warehouse |
 |---|---|---|
@@ -161,11 +161,11 @@ graph TD
 
 ---
 
-## Capacities and Licensing
+## 💰 Capacities and Licensing
 
 Fabric compute is metered through **Capacity Units (CUs)**. Every operation — Spark jobs, SQL queries, dataflows, Power BI refreshes — consumes CUs from the assigned capacity.
 
-### SKU Overview
+### 💲 SKU Overview
 
 | SKU | Type | CUs | Typical Use |
 |---|---|---|---|
@@ -188,18 +188,18 @@ Fabric compute is metered through **Capacity Units (CUs)**. Every operation — 
 
 ---
 
-## Delta Lake Fundamentals
+## 🔺 Delta Lake Fundamentals
 
 Delta Lake is the default table format across all of Fabric. Understanding it is non-negotiable for the DP-600.
 
-### Core Properties
+### ⚙️ Core Properties
 
 - **ACID transactions** — every write is atomic; readers never see partial writes. The `_delta_log` folder contains JSON commit files that track each transaction.
 - **Time travel** — query previous versions of a table using `VERSION AS OF` or `TIMESTAMP AS OF` in Spark SQL. Useful for auditing and rollback.
 - **Schema enforcement** — writes that do not match the table schema are rejected by default, preventing corrupt data.
 - **Schema evolution** — optionally allow new columns by setting `.option("mergeSchema", "true")` on a write operation.
 
-### Fabric-Specific Optimizations
+### 🚀 Fabric-Specific Optimizations
 
 - **V-Order** — a Fabric-specific write-time optimization that reorders Parquet row groups for faster reads across all engines (Spark, SQL, Power BI Direct Lake). V-Order is enabled by default.
 - **Optimize Write** — dynamically coalesces small files into larger ones during write to reduce the small-file problem. Also enabled by default in Fabric.
@@ -209,18 +209,18 @@ Delta Lake is the default table format across all of Fabric. Understanding it is
 
 ---
 
-## Power BI in Fabric
+## 📊 Power BI in Fabric
 
 Power BI is both a standalone workload and the analytics layer that sits on top of every other Fabric item.
 
-### Key Items
+### 🧱 Key Items
 
 - **Semantic model (dataset)** — the data model that defines tables, relationships, measures, and calculations. This is what reports query against.
 - **Report** — interactive visualizations built on a semantic model.
 - **Dashboard** — a single canvas of pinned tiles from one or more reports.
 - **Paginated report** — pixel-perfect, print-ready reports (SSRS-style) for invoices, statements, and operational documents.
 
-### Integration with Fabric Items
+### 🔌 Integration with Fabric Items
 
 - **Direct Lake mode** — a new storage mode where Power BI reads Delta Parquet files directly from OneLake without import or DirectQuery. Combines import-speed performance with DirectQuery-level freshness.
 - **Default semantic model** — every lakehouse and warehouse auto-generates a default semantic model that analysts can connect to immediately.
@@ -231,9 +231,9 @@ Power BI is both a standalone workload and the analytics layer that sits on top 
 
 ---
 
-## Key Concepts for Analytics Engineers
+## 🔑 Key Concepts for Analytics Engineers
 
-### Star Schema Basics
+### 📐 Star Schema Basics
 
 The star schema is the recommended modeling pattern for analytical workloads in Fabric and Power BI.
 
@@ -241,7 +241,7 @@ The star schema is the recommended modeling pattern for analytical workloads in 
 - **Dimension tables** — store descriptive attributes (customer name, product category, date). Contain surrogate keys and text/category columns. Typically small and wide.
 - **Relationships** — fact tables reference dimension tables via foreign keys, forming a star shape.
 
-### Slowly Changing Dimensions (SCD)
+### 🔄 Slowly Changing Dimensions (SCD)
 
 | Type | Behavior | Implementation |
 |---|---|---|
@@ -252,7 +252,7 @@ The star schema is the recommended modeling pattern for analytical workloads in 
 > **Exam Tip:** SCD Type 2 is the most commonly tested. Know that it requires **surrogate keys** (not natural keys) because the same business entity will have multiple rows.
 {: .note }
 
-### Data Modeling Best Practices
+### ✅ Data Modeling Best Practices
 
 - Prefer **star schemas** over flat/wide tables for Power BI performance.
 - Avoid bi-directional relationships unless absolutely necessary.
@@ -262,7 +262,7 @@ The star schema is the recommended modeling pattern for analytical workloads in 
 
 ---
 
-## Scenario Quick Reference
+## 📋 Scenario Quick Reference
 
 | Scenario | Recommended Item | Why |
 |---|---|---|

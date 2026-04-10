@@ -87,6 +87,46 @@
     fill: #fff !important;
   }
 
+  /* Mermaid pie-chart title specifically — Mermaid v10 renders it
+     with class .pieTitle which can inherit the page foreground colour
+     (black) instead of the SVG text override above. */
+  .main-content .mermaid svg .pieTitle,
+  .main-content .mermaid svg .titleText,
+  .main-content .mermaid svg .slice {
+    fill: #fff !important;
+  }
+
+  /* ── Just the Docs callout overrides (dark-mode readability) ── */
+  /* The built-in .note / .warning / .tip / .important callout boxes
+     use coloured text that is too dark against the dark-scheme page
+     background. Force the body text inside callouts to a readable
+     off-white, and lighten the callout title. */
+  .main-content .note,
+  .main-content .warning,
+  .main-content .tip,
+  .main-content .important,
+  .main-content .highlight-title {
+    color: #e2e8f0;
+  }
+
+  .main-content .note .callout-title,
+  .main-content .warning .callout-title,
+  .main-content .tip .callout-title,
+  .main-content .important .callout-title {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* Note callout — blue is too dark on dark bg, lighten it */
+  .main-content .note {
+    border-left-color: #64b5f6;
+    background: rgba(100, 181, 246, 0.08);
+  }
+
+  .main-content .note .callout-title {
+    color: #90caf9;
+  }
+
   /* ── Code blocks ─────────────────────────────────────── */
   .main-content .highlight {
     border-radius: 6px;
