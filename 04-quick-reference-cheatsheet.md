@@ -3,6 +3,7 @@ layout: default
 title: "04 — Quick Reference Cheatsheet"
 nav_order: 6
 description: "DP-600 last-minute review — key numbers, DAX patterns, decision tables, service comparisons, exam traps, and pre-exam checklist."
+permalink: /04-quick-reference-cheatsheet/
 mermaid: true
 ---
 
@@ -303,4 +304,6 @@ flowchart TD
 
 > :dart: **Exam Tip:** The DP-600 is heavily weighted toward **Domain 2 (Prepare Data)** at 45-50%. Spend the most study time on data ingestion patterns, star schema design, and query languages.
 
-*Good luck on your exam!*
+---
+
+[← 03 — Implement and Manage Semantic Models](/dp-600-study-notes/03-implement-manage-semantic-models/) | [Back to Home →](/dp-600-study-notes/)

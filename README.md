@@ -9,7 +9,7 @@
 > - 📅 **Notes Version:** 2026
 > - 🌐 **Published site:** [📘 DP-600 Study Notes](https://marcogrimaldi29.com/dp-600-study-notes/)
 > - ✍️ **Author:** [Marco Grimaldi](https://www.linkedin.com/in/marco-grimaldi29/)
-> - 🔗 **Related repos:** [📘 AZ-305 Study Notes](https://marcogrimaldi29.com/az-305-study-notes/) · [📘 DP-700 Study Notes](https://marcogrimaldi29.com/dp-700-study-notes/)
+> - 🔗 **Related repos:** [📘 AZ-305 Study Notes](https://marcogrimaldi29.com/az-305-study-notes/) · [🥽 AZ-305: Data & Analytics Services — Deep Dive](https://marcogrimaldi29.com/az-305-data-analytics/) · [📘 DP-700 Study Notes](https://marcogrimaldi29.com/dp-700-study-notes/)
 ---
 
 ## 📋 Exam At-a-Glance
@@ -32,9 +32,9 @@
 
 ```mermaid
 pie title Exam Domain Weights of the DP-600 (official ranges)
-    "Prepare Data (45–50%)" : 47
-    "Maintain a Data Analytics Solution (25–30%)" : 27
-    "Implement & Manage Semantic Models (25–30%)" : 26
+    "Prepare Data (45–50%)" : 50
+    "Maintain a Data Analytics Solution (25–30%)" : 25
+    "Implement & Manage Semantic Models (25–30%)" : 25
 ```
 
 | # | Domain | Official Weight | Key Services |

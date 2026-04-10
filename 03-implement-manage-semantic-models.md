@@ -3,6 +3,7 @@ layout: default
 title: "03 — Implement & Manage Semantic Models"
 nav_order: 5
 description: "Domain 3 (25–30%) — Storage modes, DAX calculations, Direct Lake, relationships, calculation groups, composite models, and optimization for the DP-600 exam."
+permalink: /03-implement-manage-semantic-models/
 mermaid: true
 ---
 
@@ -480,4 +481,8 @@ Incremental refresh partitions a table by date so that only recent data is refre
 
 ---
 
-*Last updated: {{ "now" | date: "%Y-%m-%d" }}*
+*These notes cover the "Implement and manage semantic models" domain of the DP-600 exam. For full coverage, pair these notes with hands-on practice in a Fabric trial or capacity environment.*
+
+---
+
+[← 02 — Prepare Data](/dp-600-study-notes/02-prepare-data/) | [04 — Quick Reference Cheatsheet →](/dp-600-study-notes/04-quick-reference-cheatsheet/)
