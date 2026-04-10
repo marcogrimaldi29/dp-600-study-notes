@@ -10,6 +10,9 @@ mermaid: true
 # Maintain a Data Analytics Solution
 {: .no_toc }
 
+> - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
+> - 📁 [← Back to Home](/dp-600-study-notes/)
+
 Domain 1 accounts for **25–30%** of the DP-600 exam. It spans two broad skill areas: implementing security and governance, and maintaining the analytics development lifecycle across Microsoft Fabric and Power BI.
 
 <details open markdown="block">

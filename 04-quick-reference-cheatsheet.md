@@ -10,6 +10,9 @@ mermaid: true
 # Quick Reference Cheatsheet
 {: .no_toc }
 
+> - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
+> - 📁 [← Back to Home](/dp-600-study-notes/)
+
 Last-minute review sheet for the DP-600 Microsoft Fabric Analytics Engineer Associate exam. Print it, bookmark it, or skim it in the parking lot.
 {: .fs-5 .fw-300 }
 
