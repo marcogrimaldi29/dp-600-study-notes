@@ -18,7 +18,7 @@
 |--------|------|
 | 🏅 Certification | Microsoft Certified: Fabric Analytics Engineer Associate |
 | 📝 Passing Score | **700 / 1000** |
-| 💶 Exam Price | **~$165 USD / ~€155 EUR** *(varies by country; VAT may apply)* |
+| 💶 Exam Price | **~€26 EUR** *(varies by country; VAT may apply)* |
 | ⏱️ Duration | **100 minutes** *(120 min seat time incl. check-in)* |
 | ❓ Question Types | MCQ, multi-select, drag-and-drop, case studies |
 | 🔁 Renewal | **Annual** via free online assessment on Microsoft Learn |
