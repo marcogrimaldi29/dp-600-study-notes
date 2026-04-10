@@ -1,0 +1,138 @@
+##############################################################
+# DP-600 Study Notes — GitHub Pages Configuration
+# Theme: Just the Docs (direct gem, NOT remote_theme)
+##############################################################
+
+# FIX: Use `theme` (resolved from Gemfile) instead of `remote_theme`.
+# remote_theme requires the jekyll-remote-theme plugin which was missing,
+# causing Jekyll to skip theme loading entirely → no CSS → bare HTML.
+theme: just-the-docs
+
+# ── Site identity ─────────────────────────────────────────
+title: "DP-600 Study Notes"
+description: >
+  Microsoft Fabric Analytics Engineer Associate — Study Notes & Exam Prep.
+  Comprehensive notes covering all three exam domains with decision diagrams,
+  semantic model patterns, DAX references, and exam caveats.
+
+author: "Marco Grimaldi"
+tagline: "Fabric Analytics Engineer Associate — Exam Prep"
+
+# ── URLs ──────────────────────────────────────────────────
+url:     "https://marcogrimaldi29.com"
+baseurl: "/dp-600-study-notes"
+
+# ── Personal website back-link ────────────────────────────
+personal_site_url:   "https://marcogrimaldi29.com"
+personal_site_label: "marcogrimaldi29.com"
+
+# ── GitHub repo (for "Edit this page" links) ──────────────
+gh_edit_link:         true
+gh_edit_link_text:    "Edit this page on GitHub ✏️"
+gh_edit_repository:   "https://github.com/marcogrimaldi29/dp-600-study-notes"
+gh_edit_branch:       "main"
+gh_edit_view_mode:    "edit"
+
+# ── Just the Docs theme settings ──────────────────────────
+color_scheme: dark
+
+logo: "/assets/images/logo-sunrise-domain.jpg"
+
+# Search
+search_enabled:         true
+search:
+  heading_level:        2
+  previews:             3
+  preview_words_before: 5
+  preview_words_after:  10
+  rel_url:              true
+  button:               false
+
+# Navigation
+nav_sort: order
+nav_external_links:
+  - title: "📘 AZ-305 Study Notes"
+    url: https://marcogrimaldi29.com/az-305-study-notes/
+  - title: "📘 DP-700 Study Notes"
+    url: https://marcogrimaldi29.com/dp-700-study-notes/
+
+# ── Back to top button ───────────────────────────────────────────────
+back_to_top:      true
+back_to_top_text: "Back to top ↑"
+
+# Aux links (top-right corner)
+aux_links:
+  "🏠 Personal Hub of Marco Grimaldi":
+    - "https://marcogrimaldi29.com"
+
+aux_links_new_tab: true
+
+# Footer
+footer_content: >
+  Maintained by <a href="https://www.linkedin.com/in/marco-grimaldi29/">Marco Grimaldi</a>.
+  Not affiliated with or endorsed by Microsoft. All content for study purposes only.
+  Theme: <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a> (MIT).
+  Built with <a href="https://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a>.
+  <br>
+
+# ── Mermaid diagram support ───────────────────────────────
+# Just the Docs handles Mermaid loading automatically when `mermaid: true`
+# is set in a page's front matter. Do NOT also call mermaid.initialize()
+# in head_custom.html — that causes a double-init race that breaks diagrams.
+mermaid:
+  version: "10.9.0"
+
+# ── Callout boxes ─────────────────────────────────────────
+callouts_level: quiet
+callouts:
+  highlight:
+    color: yellow
+  note:
+    title: "📝 Note"
+    color: blue
+  warning:
+    title: "⚠️ Exam Caveat"
+    color: red
+  tip:
+    title: "🎯 Exam Tip"
+    color: green
+  important:
+    title: "🔑 Key Point"
+    color: purple
+
+# ── Timestamps ────────────────────────────────────────────
+last_edit_timestamp:  true
+last_edit_time_format: "%d %b %Y"
+
+# ── Plugins ───────────────────────────────────────────────
+# FIX: Removed jekyll-github-metadata — it hits the GitHub API during CI
+# without a token, causing build timeouts and failures.
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# ── Jekyll build settings ─────────────────────────────────
+markdown:     kramdown
+highlighter:  rouge
+
+kramdown:
+  input:         GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - "*.gem"
+  - ".bundle"
+  - vendor
+  - node_modules
+  - SETUP.md
+  - "*.sh"
+  - ".git"

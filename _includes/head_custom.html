@@ -1,0 +1,266 @@
+<!-- _includes/head_custom.html -->
+<!-- Injected into every page <head> by Just the Docs -->
+
+<!-- ── Open Graph / Social sharing meta ─────────────────── -->
+<meta property="og:site_name" content="{{ site.title }}">
+{% if page.title %}
+  <meta property="og:title" content="{{ page.title }} | {{ site.title }}">
+{% else %}
+  <meta property="og:title" content="{{ site.title }}">
+{% endif %}
+{% if page.description %}
+  <meta property="og:description" content="{{ page.description }}">
+{% else %}
+  <meta property="og:description" content="{{ site.description }}">
+{% endif %}
+<meta property="og:type" content="website">
+<meta name="twitter:card"        content="summary">
+<meta name="twitter:title"       content="{{ page.title | default: site.title }}">
+<meta name="twitter:description" content="{{ page.description | default: site.description }}">
+<link rel="author" href="{{ site.personal_site_url }}">
+
+<!-- ── Study-optimised custom styles ────────────────────── -->
+<style>
+  /* ── Exam Caveat callout ─────────────────────────────── */
+  blockquote strong:first-child,
+  blockquote p:first-child strong:first-child {
+    display: inline-block;
+  }
+
+  /* Coloured left-border callout shorthand via blockquote */
+  .warning-box {
+    border-left: 4px solid #f28b82;
+    background:  rgba(242, 139, 130, 0.08);
+    padding:     0.6rem 1rem;
+    margin:      1rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* ── Tables ─────────────────────────────────────────── */
+  /* Make all tables scroll horizontally on small screens  */
+  .main-content table {
+    display:   block;
+    width:     100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .main-content table th {
+    background: var(--sidebar-color);
+    position:   sticky;
+    top:        0;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 0.55rem 0.8rem;
+    white-space: nowrap;
+  }
+
+  .main-content table td {
+    padding:    0.45rem 0.8rem;
+    min-width:  80px;
+    line-height: 1.4;
+  }
+
+  /* Zebra striping */
+  .main-content table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .main-content table tbody tr:hover {
+    /* --repo-hover-bg defined per-repo in _sass/custom/custom.scss */
+    background: var(--repo-hover-bg, rgba(0, 137, 123, 0.08));
+  }
+
+  /* ── Mermaid diagrams ────────────────────────────────── */
+  .main-content .mermaid {
+    margin:        1.5rem auto;
+    padding:       1rem;
+    background:    rgba(30, 30, 30, 0.5);
+    border:        1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    overflow-x:    auto;
+    text-align:    center;
+  }  /* Ensure diagram text (e.g. pie labels/title) is white for dark background */
+  .main-content .mermaid svg text {
+    fill: #fff !important;
+  }
+
+  /* ── Code blocks ─────────────────────────────────────── */
+  .main-content .highlight {
+    border-radius: 6px;
+    font-size:     0.82rem;
+  }
+
+  .main-content code {
+    font-size: 0.84em;
+    padding:   0.15em 0.4em;
+    border-radius: 4px;
+  }
+
+  /* ── SLA badges ─────────────────────────────────────── */
+  /* Bold SLA percentages stand out in tables */
+  /* --repo-accent defined per-repo in _sass/custom/custom.scss */
+  .main-content table td strong {
+    color: var(--repo-accent, #4dd0e1);
+  }
+
+  /* ── Domain weight badges in nav ─────────────────────── */
+  .nav-list-item .nav-list-link::after {
+    font-size: 0.72em;
+    opacity:   0.6;
+  }
+
+  /* ── Headings spacing ───────────────────────────────── */
+  .main-content h2 {
+    margin-top:    2rem;
+    padding-top:   0.5rem;
+    border-top:    1px solid rgba(255,255,255,0.07);
+  }
+
+  .main-content h3 {
+    margin-top: 1.5rem;
+    /* --repo-accent defined per-repo in _sass/custom/custom.scss */
+    color: var(--repo-accent, #4dd0e1);
+  }
+
+  /* ── Scenario quick-reference tables ────────────────── */
+  /* Give the last col (answer) a slightly different weight */
+  .main-content table td:last-child {
+    font-weight: 500;
+  }
+
+  /* ── Exam-caveats blockquote styling ─────────────────── */
+  /* --repo-caveat-border / --repo-caveat-bg defined per-repo in _sass/custom/custom.scss */
+  .main-content blockquote {
+    border-left:  4px solid var(--repo-caveat-border, #f4b400);
+    background:   var(--repo-caveat-bg, rgba(244, 180, 0, 0.06));
+    padding:      0.6rem 1rem;
+    border-radius: 0 6px 6px 0;
+    font-size:    0.92rem;
+  }
+
+  .main-content blockquote p {
+    margin: 0;
+  }
+
+  /* ── Page breadcrumb / domain weight tag ─────────────── */
+  /* --repo-badge-bg defined per-repo in _sass/custom/custom.scss */
+  .domain-badge {
+    display:        inline-block;
+    background:     var(--repo-badge-bg, #00897b);
+    color:          #fff;
+    font-size:      0.75rem;
+    font-weight:    700;
+    padding:        0.2rem 0.6rem;
+    border-radius:  20px;
+    margin-left:    0.5rem;
+    vertical-align: middle;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Print styles ────────────────────────────────────── */
+  @media print {
+    .side-bar, .site-header, .site-footer,
+    .main-header, #back-to-top { display: none !important; }
+    .main-content-wrap { max-width: 100% !important; }
+    .main-content { font-size: 10pt; }
+    .mermaid svg  { max-width: 100%; }
+    table         { font-size: 8pt; }
+  }
+
+  /* ── Responsive tweaks ───────────────────────────────── */
+  @media (max-width: 800px) {
+    .main-content table {
+      font-size: 0.78rem;
+    }
+    .main-content table td,
+    .main-content table th {
+      padding: 0.35rem 0.5rem;
+      min-width: 60px;
+    }
+  }
+</style>
+
+<!-- Taken from main website marcogrimaldi29.github.io and Umami analytics -->
+<!-- Google Search Console Verification -->
+<meta name="google-site-verification" content="2odQD3jEYS9beLb8PwPvtMhlwwBdeqIdQUsqM1V3Cr4" />
+
+<!-- ── Link target logic ──────────────────────────────────
+  Rules (evaluated in order):
+    1. In-page anchors (#…) and javascript: links → no action
+    2. Different hostname (truly external site) → new tab
+    3. Same hostname, pathname starts with THIS repo's baseurl
+       (e.g. /dp-600-study-notes/) → same tab (internal nav)
+    4. Same hostname, different path prefix
+       (e.g. /az-305-study-notes/ from within dp-600-study-notes)
+       → new tab (cross-repo link)
+
+  The repo baseurl is injected by Jekyll/Liquid at build time
+  so each repo gets the correct value automatically — no manual
+  changes needed when copying this file across repos.
+───────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  // Injected by Jekyll at build time from _config.yml → baseurl.
+  // e.g. "/dp-600-study-notes" — strip any trailing slash for
+  // safe prefix matching below.
+  var REPO_BASE = "{{ site.baseurl }}".replace(/\/$/, "");
+
+  function applyLinkTargets() {
+    document.querySelectorAll("a[href]").forEach(function (link) {
+      var href = link.getAttribute("href") || "";
+
+      // Rule 1 — never touch in-page anchors or javascript: links.
+      if (href.startsWith("#") || href.startsWith("javascript:")) {
+        return;
+      }
+
+      // Rule 2 — different hostname → external site → new tab.
+      // Browsers resolve link.hostname for both absolute and
+      // relative hrefs, so this works for all href formats.
+      if (link.hostname !== window.location.hostname) {
+        link.setAttribute("target", "_blank");
+        link.setAttribute("rel",    "noopener noreferrer");
+        return;
+      }
+
+      // Rules 3 & 4 — same hostname.
+      // Check whether the link's pathname falls inside THIS repo.
+      // link.pathname is always the resolved absolute path, e.g.:
+      //   /dp-600-study-notes/01-maintain-data-analytics-solution/
+      var pathname = link.pathname || "";
+
+      var isSameRepo =
+        REPO_BASE === "" ||                          // root-deployed repo
+        pathname === REPO_BASE ||                    // exact baseurl match
+        pathname.startsWith(REPO_BASE + "/");        // page inside this repo
+
+      if (!isSameRepo) {
+        // Rule 4 — same hostname but a different repo path → new tab.
+        link.setAttribute("target", "_blank");
+        link.setAttribute("rel",    "noopener noreferrer");
+      }
+      // Rule 3 — same repo → do nothing, browser default (same tab).
+    });
+  }
+
+  // Guard against the script loading after DOMContentLoaded has
+  // already fired (can happen with async/deferred injection).
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", applyLinkTargets);
+  } else {
+    applyLinkTargets();
+  }
+})();
+</script>
+
+<!-- Related to Umami -->
+<!-- Umami Analytics - GDPR-friendly / cookieless configuration -->
+{%- if jekyll.environment == "production" -%}
+<script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID_PLACEHOLDER"></script>
+{%- endif -%}
+
+<!-- Related to SEO -->
+{% seo %}

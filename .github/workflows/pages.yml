@@ -1,0 +1,71 @@
+##############################################################
+# GitHub Actions — Deploy Jekyll site to GitHub Pages
+# Triggers on every push to main branch
+##############################################################
+
+name: "Deploy to GitHub Pages"
+
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages:    write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+
+  # ── Job 1: Build the Jekyll site ────────────────────────
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "⚙️ Set up Ruby 3.3"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: false   # we run bundle install manually below
+
+      - name: "📦 Install gems"
+        run: bundle install --jobs 4 --retry 3
+
+  # ── Gets the UMAMI_WEBSITE_ID secret from GitHub Secrets and injects it into the Jekyll head template before building the site.
+
+      - name: "🔑 Inject Umami website ID"
+        run: |
+          sed -i 's/UMAMI_WEBSITE_ID_PLACEHOLDER/${{ secrets.UMAMI_WEBSITE_ID }}/g' _includes/head_custom.html
+
+      - name: "🔧 Configure GitHub Pages"
+        uses: actions/configure-pages@v5
+        id: pages
+
+      - name: "🏗️ Build with Jekyll"
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        env:
+          JEKYLL_ENV: production
+
+      - name: "🗜️ Upload site artifact"
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./_site"
+
+  # ── Job 2: Deploy to GitHub Pages ───────────────────────
+  deploy:
+    environment:
+      name: github-pages
+      url:  ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: "🚀 Deploy to GitHub Pages"
+        id: deployment
+        uses: actions/deploy-pages@v4
