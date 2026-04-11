@@ -91,7 +91,7 @@ callouts:
     color: yellow
   note:
     title: "📝 Note"
-    color: blue
+    color: purple
   warning:
     title: "⚠️ Exam Caveat"
     color: red
