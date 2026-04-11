@@ -491,7 +491,7 @@ Key capabilities:
 
 ### 💾 Select, Filter, and Aggregate Data by Using SQL
 
-T-SQL is the primary query language for Fabric Warehouse and the SQL analytics endpoint.
+T-SQL is the primary query language for Fabric Warehouse and the SQL Analytics Endpoint.
 
 ```sql
 -- Common analytical query pattern
@@ -526,7 +526,7 @@ GROUP BY p.ProductName
 ORDER BY TotalSales DESC;
 ```
 
-> **Exam Caveat:** The SQL analytics endpoint (lakehouse) supports **read-only** T-SQL: SELECT, CREATE VIEW, CREATE FUNCTION (inline TVF). It does NOT support INSERT, UPDATE, DELETE, CREATE TABLE, or stored procedures.
+> **Exam Caveat:** The SQL Analytics Endpoint (Lakehouse) supports **read-only** T-SQL: SELECT, CREATE VIEW, CREATE FUNCTION (inline TVF). It does NOT support INSERT, UPDATE, DELETE, CREATE TABLE, or stored procedures.
 {: .warning }
 
 ---
