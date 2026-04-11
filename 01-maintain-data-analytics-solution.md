@@ -32,13 +32,13 @@ Every Fabric workspace exposes four built-in roles. The exam expects you to know
 
 | Capability | Admin | Member | Contributor | Viewer |
 |---|:---:|:---:|:---:|:---:|
-| Read and explore items | Yes | Yes | Yes | Yes |
-| Create, edit, and delete items | Yes | Yes | Yes | No |
-| Publish and update an app | Yes | Yes | No | No |
-| Share items and grant access | Yes | Yes | No | No |
-| Manage workspace settings and roles | Yes | No | No | No |
-| Add or remove users (all roles) | Yes | No | No | No |
-| Add Members/Contributors/Viewers | Yes | Yes | No | No |
+| Read and explore items | ✅ | ✅ | ✅ | ✅ |
+| Create, edit, and delete items | ✅ | ✅ | ✅ | ❌ |
+| Publish and update an app | ✅ | ✅ | ❌ | ❌ |
+| Share items and grant access | ✅ | ✅ | ❌ | ❌ |
+| Manage workspace settings and roles | ✅ | ❌ | ❌ | ❌ |
+| Add or remove users (all roles) | ✅ | ❌ | ❌ | ❌ |
+| Add Members/Contributors/Viewers | ✅ | ✅ | ❌ | ❌ |
 
 > **Exam Tip:** Members can add other Members, Contributors, and Viewers, but they **cannot** add Admins. Only an Admin can grant Admin access.
 {: .note }
@@ -77,7 +77,7 @@ graph TD
 | **Defined where** | DAX filter expression on roles in the semantic model | Model roles using column permissions | Model roles using object metadata permissions |
 | **Supported in** | Power BI Desktop, XMLA endpoint, Tabular Editor | XMLA endpoint, Tabular Editor | XMLA endpoint, Tabular Editor |
 | **User experience** | Data appears filtered; schema is visible | Column returns errors or blanks | Table or column is invisible to the user |
-| **Can be authored in Power BI Desktop?** | Yes | No | No |
+| **Can be authored in Power BI Desktop?** | ✅ | ❌ | ❌ |
 
 - **RLS** uses DAX predicates (e.g., `[Region] = USERPRINCIPALNAME()`) to restrict which rows a user sees. You assign users or security groups to roles.
 - **CLS** prevents specific columns from being queried at all. It must be configured via external tooling such as Tabular Editor or XMLA scripts.
@@ -163,11 +163,11 @@ The PBIP format saves a Power BI project as a folder structure with human-readab
 | Aspect | .pbix | .pbip |
 |---|---|---|
 | **Format** | Single compressed binary file | Folder with JSON and metadata files |
-| **Version control friendly** | No — binary diffs are meaningless | Yes — text-based diffs show exactly what changed |
+| **Version control friendly** | ❌ — binary diffs are meaningless | ✅ — text-based diffs show exactly what changed |
 | **Merge conflicts** | Cannot be resolved in standard tools | Resolvable with standard merge tooling |
-| **Sensitivity label support** | Yes | Yes |
+| **Sensitivity label support** | ✅ | ✅ |
 | **Sharing as a file** | Easy — single file | Requires the whole folder |
-| **Recommended for Git workflows** | No | Yes |
+| **Recommended for Git workflows** | ❌ | ✅ |
 
 **PBIP folder structure:**
 

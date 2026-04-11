@@ -166,7 +166,7 @@ CALCULATE(
 | **Defined in** | Semantic model (DAX filter) | Semantic model (role config) | Semantic model (role config) |
 | **Implementation** | DAX expression on table | Column permissions in role | `None` or `Read` metadata permission |
 | **Tooling** | Power BI Desktop / XMLA / Tabular Editor | XMLA / Tabular Editor only | XMLA / Tabular Editor only |
-| **Works with Direct Lake?** | Yes | Yes | Yes |
+| **Works with Direct Lake?** | ✅ | ✅ | ✅ |
 | **Test method** | "View as Role" in service | XMLA query as role | XMLA query as role |
 
 ```mermaid
@@ -194,8 +194,8 @@ flowchart LR
 | **Best for** | Data engineering, ML, ELT | Enterprise BI, complex joins, stored procs | Log/telemetry analytics | Streaming + real-time analytics |
 | **Schema** | Schema-on-read & schema-on-write | Schema-on-write (strict) | Semi-structured, schemaless | Semi-structured |
 | **Transactions** | ACID via Delta | Full T-SQL transactions | Append-optimized | Append-optimized |
-| **SQL endpoint?** | Yes (read-only auto-generated) | Native | No (KQL only) | No (KQL only) |
-| **Direct Lake support** | Yes | Yes | No | No |
+| **SQL endpoint?** | ✅ (read-only auto-generated) | Native | ❌ (KQL only) | ❌ (KQL only) |
+| **Direct Lake support** | ✅ | ✅ | ❌ | ❌ |
 
 > **Exam Tip:** If the question mentions **T-SQL stored procedures** or **views with complex joins**, the answer is **Warehouse**. If it mentions **streaming** or **IoT telemetry**, think **Eventhouse / KQL Database**.
 {: .note }
@@ -207,11 +207,11 @@ flowchart LR
 | Criteria | Dataflow Gen2 | Notebook (Spark) | Copy Activity (Pipeline) | Shortcut |
 |----------|---------------|-------------------|--------------------------|----------|
 | **Skill level** | Low-code (Power Query) | Pro-code (Python/Scala) | Low-code (config) | No-code |
-| **Transformation** | Yes (M / Power Query) | Yes (full Spark) | Minimal (mapping only) | None (pass-through) |
+| **Transformation** | ✅ (M / Power Query) | ✅ (full Spark) | Minimal (mapping only) | None (pass-through) |
 | **Best for** | Simple transforms, small data | Complex ETL, ML prep, large data | Bulk copy between stores | Virtualized access, zero-copy |
 | **Scheduling** | Pipeline or standalone | Pipeline | Pipeline | Always live |
 | **Compute** | Fabric Dataflow compute | Spark pool | Pipeline IR | None |
-| **Writes Delta?** | Yes (to Lakehouse) | Yes | Yes | No (reads in-place) |
+| **Writes Delta?** | ✅ (to Lakehouse) | ✅ | ✅ | ❌ (reads in-place) |
 
 > **Exam Caveat:** **Shortcuts** do not copy data — they create a virtualized reference. Data stays in the source (ADLS, S3, or another OneLake location). This is critical for questions about data residency and latency.
 {: .warning }

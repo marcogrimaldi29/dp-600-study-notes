@@ -120,11 +120,11 @@ flowchart TD
 
 | Method | Code Required | Best For | Scheduling | Transform Capability |
 |--------|:------------:|----------|:----------:|---------------------|
-| **Copy Activity** (Pipeline) | No | Bulk ETL, 90+ source connectors | Yes (triggers, schedule) | Minimal (column mapping) |
-| **Dataflow Gen2** | No (M / Power Query) | Self-service, moderate transforms | Yes (pipeline orchestration) | Rich (300+ transforms) |
-| **Spark Notebook** | Yes (PySpark, Spark SQL) | Complex transforms, ML, large data | Yes (pipeline, schedule) | Full programmatic control |
-| **Shortcut** | No | Zero-copy access to ADLS, S3, GCS, other lakehouses | N/A (live pointer) | None (query at read time) |
-| **Eventstream** | No | Real-time ingestion from Event Hubs, Kafka | Continuous | Inline transforms |
+| **Copy Activity (Pipeline)** | ❌ | Bulk ETL, 90+ source connectors | ✅ (triggers, schedule) | Minimal (column mapping) |
+| **Dataflow Gen2** | ❌ (M / Power Query) | Self-service, moderate transforms | ✅ (pipeline orchestration) | Rich (300+ transforms) |
+| **Spark Notebook** | ✅ (PySpark, Spark SQL) | Complex transforms, ML, large data | ✅ (pipeline, schedule) | Full programmatic control |
+| **Shortcut** | ❌ | Zero-copy access to ADLS, S3, GCS, other lakehouses | N/A (live pointer) | None (query at read time) |
+| **Eventstream** | ❌ | Real-time ingestion from Event Hubs, Kafka | Continuous | Inline transforms |
 
 > **Exam Caveat:** Shortcuts do NOT copy data — they create a virtual pointer. This means shortcut data is NOT included in lakehouse OPTIMIZE or VACUUM operations. For exam questions about reducing data duplication, shortcuts are the answer.
 {: .warning }
@@ -153,15 +153,15 @@ flowchart TD
 
 | Criterion | Lakehouse | Warehouse | Eventhouse (KQL DB) |
 |-----------|:---------:|:---------:|:-------------------:|
-| **Engine** | Spark + SQL analytics endpoint | Full T-SQL | KQL |
-| **Write via T-SQL** | No (read-only endpoint) | Yes (INSERT, UPDATE, DELETE) | No |
-| **Write via Spark** | Yes | No | No |
+| **Engine** | Spark + SQL Analytics Endpoint | Full T-SQL | KQL |
+| **Write via T-SQL** | ❌ (read-only endpoint) | ✅ (INSERT, UPDATE, DELETE) | ❌ |
+| **Write via Spark** | ✅ | ❌ | ❌ |
 | **File format** | Delta (Parquet) | Proprietary (managed) | Columnar (KQL engine) |
 | **Schema enforcement** | Schema-on-read or schema-on-write | Schema-on-write (strict) | Schema-on-write |
-| **Unstructured files** | Yes (Files/ folder) | No | No |
+| **Unstructured files** | ✅ (Files/ folder) | ❌ | ❌ |
 | **Best for** | Data engineering, ML, flexible ETL | Enterprise DW, SQL-heavy BI | Real-time analytics, logs, IoT |
 
-> **Exam Tip:** If the scenario says "T-SQL stored procedures are needed for data transformation," the answer is **Warehouse** — the lakehouse SQL analytics endpoint is **read-only**.
+> **Exam Tip:** If the scenario says "T-SQL stored procedures are needed for data transformation," the answer is **Warehouse** — the Lakehouse SQL Analytics Endpoint is **read-only**.
 {: .note }
 
 > **Exam Caveat:** A lakehouse has TWO entry points: (1) the Spark engine for read/write, and (2) the SQL analytics endpoint for read-only T-SQL. The exam frequently tests which operations are available on each.
@@ -189,14 +189,14 @@ flowchart TD
 
 ### 🧱 Create Views, Functions, and Stored Procedures
 
-These objects are available in the **Warehouse** and, for views only, in the **SQL analytics endpoint** (lakehouse).
+These objects are available in the **Warehouse** and, for Views only, in the **SQL Analytics Endpoint** (Lakehouse).
 
 | Object | Warehouse | SQL Analytics Endpoint (Lakehouse) |
 |--------|:---------:|:---------------------------------:|
-| **Views** | Yes (CREATE VIEW) | Yes (auto-generated + custom) |
-| **Stored Procedures** | Yes (CREATE PROCEDURE) | No |
-| **Table-Valued Functions** | Yes | No |
-| **Scalar Functions** | Yes | No |
+| **Views** | ✅ (CREATE VIEW) | ✅ (auto-generated + custom) |
+| **Stored Procedures** | ✅ (CREATE PROCEDURE) | ❌ |
+| **Table-Valued Functions** | ✅ | ❌ |
+| **Scalar Functions** | ✅ | ❌ |
 
 ```sql
 -- Warehouse: Create a reusable view
@@ -219,7 +219,7 @@ BEGIN
 END;
 ```
 
-> **Exam Tip:** The lakehouse SQL analytics endpoint auto-generates views for each Delta table. You CAN create custom views on top of these, but you CANNOT create stored procedures or functions.
+> **Exam Tip:** The Lakehouse SQL Analytics Endpoint auto-generates Views for each Delta table. You *CAN* create custom views on top of these, but you *CANNOT* create stored procedures or functions.
 {: .note }
 
 ---
@@ -233,14 +233,14 @@ Enrichment adds calculated or derived information to existing datasets.
 | **Computed column** | SQL (Warehouse) | `ALTER TABLE ... ADD FullName AS FirstName + ' ' + LastName` |
 | **Derived column** | Dataflow Gen2 | Add Column > Custom Column in Power Query |
 | **withColumn** | PySpark (Notebook) | `df.withColumn("Margin", col("Revenue") - col("Cost"))` |
-| **Lookup / merge** | Dataflow Gen2 | Merge with reference table to add descriptions |
+| **Lookup / Merge** | Dataflow Gen2 | Merge with reference table to add descriptions |
 | **Reference table** | SQL (Warehouse) | JOIN with a dimension table to add category names |
 
 ---
 
 ### ⭐ Implement a Star Schema for a Lakehouse or Warehouse
 
-The star schema is the **recommended modeling pattern** for analytics in Fabric. It optimizes query performance and simplifies semantic model design.
+The Star Schema is the **recommended modeling pattern** for analytics in Fabric. It optimizes query performance and simplifies semantic model design.
 
 ```mermaid
 erDiagram
@@ -298,7 +298,7 @@ erDiagram
 2. **Dimension tables** store descriptive attributes (customer name, product category, date)
 3. **Surrogate keys** are integer keys (auto-generated) that replace natural/business keys
 4. **Date dimension** should always be a separate table — never rely on date columns in the fact table
-5. Avoid snowflake schemas in Fabric semantic models (flatten hierarchies into dimensions)
+5. **Avoid Snowflake Schemas** in Fabric semantic models (flatten hierarchies into dimensions)
 
 ```sql
 -- Create a dimension table with surrogate key in Warehouse
@@ -324,7 +324,7 @@ CREATE TABLE dbo.FactSales (
 );
 ```
 
-> **Exam Caveat:** Fabric Warehouse supports `IDENTITY` columns for surrogate keys, but the lakehouse (Delta tables via Spark) does NOT. In lakehouses, use `monotonically_increasing_id()` in PySpark or a manual key generation approach.
+> **Exam Caveat:** Fabric Warehouse supports `IDENTITY` columns for surrogate keys, but the Lakehouse (Delta tables via Spark) does NOT. In Lakehouses, use `monotonically_increasing_id()` in PySpark or a manual key generation approach.
 {: .warning }
 
 > **Exam Tip:** The exam tests why surrogate keys are preferred over natural keys: (1) they are stable even when business keys change, (2) they are integers which join faster, (3) they handle unknown/missing dimension members (e.g., key = -1).
@@ -476,7 +476,7 @@ Filtering removes unwanted rows early in the pipeline to reduce processing volum
 
 ### 🖱️ Select, Filter, and Aggregate Data by Using the Visual Query Editor
 
-The **Visual Query Editor** is a drag-and-drop interface available in the lakehouse SQL analytics endpoint and Warehouse.
+The **Visual Query Editor** is a drag-and-drop interface available in the Lakehouse SQL Analytics Endpoint and Warehouse.
 
 Key capabilities:
 - Drag tables onto the canvas and visually define joins
@@ -484,7 +484,7 @@ Key capabilities:
 - Generates T-SQL under the hood — you can switch to SQL view to see the query
 - Supports GROUP BY, ORDER BY, TOP, and WHERE clauses visually
 
-> **Exam Tip:** The Visual Query Editor is the correct answer when the scenario describes a **business analyst** or **citizen developer** who needs to query lakehouse or warehouse data without writing SQL.
+> **Exam Tip:** The Visual Query Editor is the correct answer when the scenario describes a **business analyst** or **citizen developer** who needs to query Lakehouse or Warehouse data without writing SQL.
 {: .note }
 
 ---
