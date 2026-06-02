@@ -160,6 +160,14 @@ This site uses [Umami](https://umami.is/) for privacy-friendly analytics.
 
 ---
 
+## ⭐ Support This Project
+
+If these notes helped you prepare for the DP-600 exam, consider giving the repo a **star on GitHub** — it helps others discover these resources and keeps the project going!
+
+[⭐ Star on GitHub](https://github.com/marcogrimaldi29/dp-600-study-notes){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
+
+---
+
 ## ©️ Credits & Acknowledgements
 
 The [Just the Docs](https://github.com/just-the-docs/just-the-docs) theme is used for a clean, documentation-style layout. Licensed under [MIT](https://opensource.org/license/MIT).
