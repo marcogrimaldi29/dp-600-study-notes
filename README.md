@@ -146,6 +146,12 @@ This site uses [Umami](https://umami.is/) for privacy-friendly analytics.
 
 ---
 
+## ⭐ Support This Project
+
+If these notes helped you on your DP-600 journey, consider giving the repo a **⭐ star on GitHub** — it helps others find these resources and motivates continued updates. Thank you!
+
+---
+
 ## ©️ Credits & Acknowledgements
 
 The [Just the Docs](https://github.com/just-the-docs/just-the-docs) theme is used for a clean, documentation-style layout. Licensed under [MIT](https://opensource.org/license/MIT).
