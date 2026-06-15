@@ -64,7 +64,7 @@ back_to_top_text: "Back to top ↑"
 
 # Aux links (top-right corner)
 aux_links:
-  "🏠 Personal Hub of Marco Grimaldi":
+  "🏠 marcogrimaldi29.com":
     - "https://marcogrimaldi29.com"
 
 aux_links_new_tab: true
