@@ -3,7 +3,7 @@
 
 [![Deploy to GitHub Pages](https://github.com/marcogrimaldi29/dp-600-study-notes/actions/workflows/pages.yml/badge.svg)](https://github.com/marcogrimaldi29/dp-600-study-notes/actions/workflows/pages.yml)
 [![GitHub](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen?logo=github)](https://github.com/marcogrimaldi29/dp-600-study-notes)
-[![Personal Hub of Marco Grimaldi](https://img.shields.io/badge/Blog-marcogrimaldi29.com-blue?logo=rss)](https://marcogrimaldi29.com)
+[![marcogrimaldi29.com](https://img.shields.io/badge/Blog-marcogrimaldi29.com-blue?logo=rss)](https://marcogrimaldi29.com)
 
 > - 🎯 **Goal:** Earn the Microsoft Certified: Fabric Analytics Engineer Associate badge
 > - 📅 **Notes Version:** 2026
