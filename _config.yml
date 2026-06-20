@@ -36,7 +36,7 @@ gh_edit_view_mode:    "edit"
 # ── Just the Docs theme settings ──────────────────────────
 color_scheme: dark
 
-logo: "/assets/images/logo-sunrise-domain.jpg"
+logo: "/assets/images/assets/images/site-mark-no-bg.svg"
 
 # Search
 search_enabled:         true
