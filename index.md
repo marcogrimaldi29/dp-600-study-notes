@@ -90,6 +90,18 @@ pie title DP-600 — Official Exam Domain Weights
 <a href="./04-quick-reference-cheatsheet/" class="btn btn-outline fs-5">Read →</a>
 </div>
 
+<div style="border:1px solid #4dd0e1; border-radius:8px; padding:1rem; background:#2d2f31;">
+<h3 style="margin-top:0;">🔎 Appendix A — KQL Reference</h3>
+<p>Kusto Query Language syntax: operators, aggregations, <code>bin()</code> time-series, joins, ingestion, and exam caveats.</p>
+<a href="./05-appendix-kql-reference/" class="btn btn-outline fs-5">Read →</a>
+</div>
+
+<div style="border:1px solid #81c784; border-radius:8px; padding:1rem; background:#2d2f31;">
+<h3 style="margin-top:0;">📐 Appendix B — DAX Reference</h3>
+<p>DAX syntax deep dive: evaluation contexts, CALCULATE, filter functions, iterators, time intelligence, and exam caveats.</p>
+<a href="./06-appendix-dax-reference/" class="btn btn-outline fs-5">Read →</a>
+</div>
+
 </div>
 
 ---
@@ -105,8 +117,9 @@ flowchart LR
     D2["🔄 Domain 2\nPrepare Data\n45–50%"]
     D3["📐 Domain 3\nSemantic Models\n25–30%"]
     SHEET["⚡ Cheatsheet\n(last-minute)"]
+    APX["🔎📐 Appendices\nKQL & DAX"]
 
-    PRE --> D1 --> D2 --> D3 --> SHEET
+    PRE --> D1 --> D2 --> D3 --> SHEET --> APX
 ```
 
 ### 💡 Study Tips
