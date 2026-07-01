@@ -72,7 +72,8 @@ dp-600-study-notes/
 ├── 03-implement-manage-semantic-models.md       ← Domain 3 (25–30%)
 ├── 04-quick-reference-cheatsheet.md             ← Last-minute review & exam traps
 ├── 05-appendix-kql-reference.md                 ← Appendix A — KQL syntax & exam caveats
-└── 06-appendix-dax-reference.md                 ← Appendix B — DAX syntax & exam caveats
+├── 06-appendix-dax-reference.md                 ← Appendix B — DAX syntax & exam caveats
+└── 07-appendix-sql-reference.md                 ← Appendix C — T-SQL syntax & exam caveats
 ```
 
 ---
@@ -115,6 +116,7 @@ dp-600-study-notes/
 | [⚡ 04 — Quick Reference Cheatsheet](./04-quick-reference-cheatsheet.md) | Key numbers, decision tables, exam traps, final checklist |
 | [🔎 Appendix A — KQL Reference](./05-appendix-kql-reference.md) | KQL syntax, operators, aggregations, time-series, joins, exam caveats |
 | [📐 Appendix B — DAX Reference](./06-appendix-dax-reference.md) | DAX evaluation contexts, CALCULATE, iterators, time intelligence, exam caveats |
+| [🧮 Appendix C — SQL Reference](./07-appendix-sql-reference.md) | T-SQL: Warehouse vs SQL endpoint, CTAS, COPY INTO, views, CTEs, window functions, security |
 
 ---
 
