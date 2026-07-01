@@ -102,6 +102,12 @@ pie title DP-600 — Official Exam Domain Weights
 <a href="./06-appendix-dax-reference/" class="btn btn-outline fs-5">Read →</a>
 </div>
 
+<div style="border:1px solid #ffb74d; border-radius:8px; padding:1rem; background:#2d2f31;">
+<h3 style="margin-top:0;">🧮 Appendix C — SQL Reference</h3>
+<p>T-SQL syntax: Warehouse vs SQL analytics endpoint, CTAS, COPY INTO, views, CTEs, window functions, security, and exam caveats.</p>
+<a href="./07-appendix-sql-reference/" class="btn btn-outline fs-5">Read →</a>
+</div>
+
 </div>
 
 ---
@@ -117,7 +123,7 @@ flowchart LR
     D2["🔄 Domain 2\nPrepare Data\n45–50%"]
     D3["📐 Domain 3\nSemantic Models\n25–30%"]
     SHEET["⚡ Cheatsheet\n(last-minute)"]
-    APX["🔎📐 Appendices\nKQL & DAX"]
+    APX["🔎📐🧮 Appendices\nKQL, DAX & SQL"]
 
     PRE --> D1 --> D2 --> D3 --> SHEET --> APX
 ```

@@ -274,4 +274,4 @@ SUMMARIZECOLUMNS(
 
 ---
 
-[← Appendix A — KQL Reference](/dp-600-study-notes/05-appendix-kql-reference/) | [Back to Home →](/dp-600-study-notes/)
+[← Appendix A — KQL Reference](/dp-600-study-notes/05-appendix-kql-reference/) | [Appendix C — SQL Reference →](/dp-600-study-notes/07-appendix-sql-reference/)
