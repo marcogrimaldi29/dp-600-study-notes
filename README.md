@@ -70,7 +70,9 @@ dp-600-study-notes/
 ├── 01-maintain-data-analytics-solution.md       ← Domain 1 (25–30%)
 ├── 02-prepare-data.md                           ← Domain 2 (45–50%)
 ├── 03-implement-manage-semantic-models.md       ← Domain 3 (25–30%)
-└── 04-quick-reference-cheatsheet.md             ← Last-minute review & exam traps
+├── 04-quick-reference-cheatsheet.md             ← Last-minute review & exam traps
+├── 05-appendix-kql-reference.md                 ← Appendix A — KQL syntax & exam caveats
+└── 06-appendix-dax-reference.md                 ← Appendix B — DAX syntax & exam caveats
 ```
 
 ---
@@ -111,6 +113,8 @@ dp-600-study-notes/
 | [🔄 02 — Prepare Data](./02-prepare-data.md) | Data connections, star schemas, transforms, SQL, KQL, DAX queries |
 | [📐 03 — Semantic Models](./03-implement-manage-semantic-models.md) | Storage modes, DAX, Direct Lake, relationships, optimization |
 | [⚡ 04 — Quick Reference Cheatsheet](./04-quick-reference-cheatsheet.md) | Key numbers, decision tables, exam traps, final checklist |
+| [🔎 Appendix A — KQL Reference](./05-appendix-kql-reference.md) | KQL syntax, operators, aggregations, time-series, joins, exam caveats |
+| [📐 Appendix B — DAX Reference](./06-appendix-dax-reference.md) | DAX evaluation contexts, CALCULATE, iterators, time intelligence, exam caveats |
 
 ---
 

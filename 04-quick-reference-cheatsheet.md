@@ -319,4 +319,4 @@ flowchart TD
 
 ---
 
-[← 03 — Implement and Manage Semantic Models](/dp-600-study-notes/03-implement-manage-semantic-models/) | [Back to Home →](/dp-600-study-notes/)
+[← 03 — Implement and Manage Semantic Models](/dp-600-study-notes/03-implement-manage-semantic-models/) | [Appendix A — KQL Reference →](/dp-600-study-notes/05-appendix-kql-reference/)
