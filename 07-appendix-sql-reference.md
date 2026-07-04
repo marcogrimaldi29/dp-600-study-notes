@@ -253,4 +253,4 @@ CREATE SECURITY POLICY dbo.RegionFilter
 
 ---
 
-[← Appendix B — DAX Reference](/dp-600-study-notes/06-appendix-dax-reference/) | [Back to Home →](/dp-600-study-notes/)
+[← Appendix B — DAX Reference](/dp-600-study-notes/06-appendix-dax-reference/) | [Appendix D — Spark SQL Reference →](/dp-600-study-notes/08-appendix-spark-sql-reference/)

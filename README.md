@@ -73,7 +73,9 @@ dp-600-study-notes/
 ├── 04-quick-reference-cheatsheet.md             ← Last-minute review & exam traps
 ├── 05-appendix-kql-reference.md                 ← Appendix A — KQL syntax & exam caveats
 ├── 06-appendix-dax-reference.md                 ← Appendix B — DAX syntax & exam caveats
-└── 07-appendix-sql-reference.md                 ← Appendix C — T-SQL syntax & exam caveats
+├── 07-appendix-sql-reference.md                 ← Appendix C — T-SQL syntax & exam caveats
+├── 08-appendix-spark-sql-reference.md           ← Appendix D — Spark SQL syntax & exam caveats
+└── 09-appendix-pyspark-reference.md             ← Appendix E — PySpark syntax & exam caveats
 ```
 
 ---
@@ -117,6 +119,8 @@ dp-600-study-notes/
 | [🔎 Appendix A — KQL Reference](./05-appendix-kql-reference.md) | KQL syntax, operators, aggregations, time-series, joins, exam caveats |
 | [📐 Appendix B — DAX Reference](./06-appendix-dax-reference.md) | DAX evaluation contexts, CALCULATE, iterators, time intelligence, exam caveats |
 | [🧮 Appendix C — SQL Reference](./07-appendix-sql-reference.md) | T-SQL: Warehouse vs SQL endpoint, CTAS, COPY INTO, views, CTEs, window functions, security |
+| [✨ Appendix D — Spark SQL Reference](./08-appendix-spark-sql-reference.md) | Lakehouse Delta tables, MERGE, OPTIMIZE/VACUUM, time travel, temp views |
+| [🐍 Appendix E — PySpark Reference](./09-appendix-pyspark-reference.md) | DataFrame API, lazy evaluation, reading/writing Delta, joins, save modes, merges |
 
 ---
 

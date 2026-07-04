@@ -108,6 +108,18 @@ pie title DP-600 — Official Exam Domain Weights
 <a href="./07-appendix-sql-reference/" class="btn btn-outline fs-5">Read →</a>
 </div>
 
+<div style="border:1px solid #ff8a65; border-radius:8px; padding:1rem; background:#2d2f31;">
+<h3 style="margin-top:0;">✨ Appendix D — Spark SQL Reference</h3>
+<p>Spark SQL on Lakehouse Delta: managed vs external tables, MERGE, OPTIMIZE/VACUUM, time travel, temp views, and exam caveats.</p>
+<a href="./08-appendix-spark-sql-reference/" class="btn btn-outline fs-5">Read →</a>
+</div>
+
+<div style="border:1px solid #9575cd; border-radius:8px; padding:1rem; background:#2d2f31;">
+<h3 style="margin-top:0;">🐍 Appendix E — PySpark Reference</h3>
+<p>PySpark DataFrame API: lazy evaluation, reading/writing Delta, transformations, joins, save modes, merges, and exam caveats.</p>
+<a href="./09-appendix-pyspark-reference/" class="btn btn-outline fs-5">Read →</a>
+</div>
+
 </div>
 
 ---
@@ -123,7 +135,7 @@ flowchart LR
     D2["🔄 Domain 2\nPrepare Data\n45–50%"]
     D3["📐 Domain 3\nSemantic Models\n25–30%"]
     SHEET["⚡ Cheatsheet\n(last-minute)"]
-    APX["🔎📐🧮 Appendices\nKQL, DAX & SQL"]
+    APX["🔎📐🧮✨🐍 Appendices\nKQL, DAX, SQL,\nSpark SQL & PySpark"]
 
     PRE --> D1 --> D2 --> D3 --> SHEET --> APX
 ```
