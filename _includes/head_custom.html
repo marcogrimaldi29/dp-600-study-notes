@@ -197,8 +197,102 @@
     .main-header, #back-to-top { display: none !important; }
     .main-content-wrap { max-width: 100% !important; }
     .main-content { font-size: 10pt; }
-    .mermaid svg  { max-width: 100%; }
     table         { font-size: 8pt; }
+
+    /* Force a light page regardless of color_scheme: dark — several
+       rules above recolor callout text to near-white for dark-mode
+       readability, which is invisible on a white printed page. */
+    html, body, .main-content, .main-content-wrap {
+      background: #ffffff !important;
+      color:      #1a1a1a !important;
+    }
+
+    /* Just the Docs' own dark-scheme heading/table-header colors are
+       set directly on h1-h4 / table th (more specific than the
+       .main-content rule above), so they must be overridden here too. */
+    .main-content h1, .main-content h2, .main-content h3, .main-content h4 {
+      color: #1a1a1a !important;
+    }
+
+    .main-content table th {
+      background: #e5e5e5 !important;
+      color:      #1a1a1a !important;
+    }
+
+    .main-content table td {
+      background: #ffffff !important;
+      color:      #1a1a1a !important;
+    }
+
+    .main-content table tbody tr:nth-child(even) td {
+      background: #f5f5f5 !important;
+    }
+
+    .main-content .note,
+    .main-content .warning,
+    .main-content .tip,
+    .main-content .important,
+    .main-content .highlight-title,
+    .main-content blockquote {
+      color:      #1a1a1a !important;
+      background: #f3f3f3 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust:         exact;
+    }
+
+    .main-content .note .callout-title,
+    .main-content .warning .callout-title,
+    .main-content .tip .callout-title,
+    .main-content .important .callout-title {
+      color: #000000 !important;
+    }
+
+    /* Inline code chips use a dark badge for dark-mode contrast —
+       switch to a light chip so it isn't a near-black block on paper. */
+    .main-content code {
+      background: #eeeeee !important;
+      color:      #1a1a1a !important;
+    }
+
+    /* Avoid splitting a block across a page break where possible */
+    table, pre, .main-content .highlight, .main-content .mermaid,
+    .main-content blockquote {
+      break-inside:      avoid;
+      page-break-inside: avoid;
+    }
+
+    .main-content h1, .main-content h2, .main-content h3 {
+      break-after:      avoid;
+      page-break-after: avoid;
+    }
+
+    /* Mermaid diagrams scale to the printable width. Note: diagrams
+       keep their dark theme (dark node fills / light text) — re-init
+       Mermaid with a different theme just for print isn't attempted
+       here, since _config.yml already warns that a second
+       mermaid.initialize() call races with Just the Docs' own init
+       and breaks diagrams. */
+    .mermaid svg { max-width: 100%; height: auto; }
+
+    /* Screen layout scrolls wide tables horizontally; on paper that
+       just clips content, so let the table lay out at full width. */
+    .main-content table {
+      display:    table;
+      width:      100%;
+      overflow:   visible;
+    }
+
+    /* Show link targets since a printed page has no hover/click */
+    .main-content a[href^="http"]::after {
+      content:   " (" attr(href) ")";
+      font-size: 0.75em;
+      color:     #444444;
+    }
+
+    /* Combined "print the whole guide" page (printable.md): start
+       each chapter on its own sheet. */
+    .print-chapter              { break-before: page; }
+    .print-chapter:first-of-type { break-before: auto; }
   }
 
   /* ── Responsive tweaks ───────────────────────────────── */

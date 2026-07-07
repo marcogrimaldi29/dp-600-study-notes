@@ -15,6 +15,7 @@ mermaid: true
 
 [Start Studying →](/dp-600-study-notes/00-fabric-prerequisites){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [View on GitHub](https://github.com/marcogrimaldi29/dp-600-study-notes){: .btn .fs-5 .mb-4 .mb-md-0 target="_blank" }
+[🖨️ Printable version](/dp-600-study-notes/printable){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
