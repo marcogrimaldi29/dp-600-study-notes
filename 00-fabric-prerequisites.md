@@ -226,7 +226,7 @@ Power BI is both a standalone workload and the analytics layer that sits on top 
 - **Default semantic model** — every lakehouse and warehouse auto-generates a default semantic model that analysts can connect to immediately.
 - **SQL analytics endpoint** — Power BI can also use DirectQuery against a lakehouse SQL endpoint or warehouse.
 
-> **Exam Caveat:** Direct Lake is **not** the same as DirectQuery. Direct Lake reads columnar data from Parquet files in memory — it does not issue SQL queries to a source. If Direct Lake cannot load data (e.g., unsupported column type), it **falls back** to DirectQuery automatically.
+> **Exam Caveat:** Direct Lake is **not** the same as DirectQuery. Direct Lake reads columnar data from Parquet files in memory — it does not issue SQL queries to a source. Fallback to DirectQuery only applies to **Direct Lake on SQL analytics endpoint** (and can be disabled); **Direct Lake on OneLake never falls back** — an unsupported or over-guardrail query errors instead. See Domain 3 for the full OneLake-vs-SQL comparison.
 {: .warning }
 
 ---

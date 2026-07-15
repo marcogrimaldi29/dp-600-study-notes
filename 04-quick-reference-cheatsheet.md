@@ -29,11 +29,11 @@ Last-minute review sheet for the DP-600 Microsoft Fabric Analytics Engineer Asso
 
 | Item | Value / Threshold |
 |------|-------------------|
-| Max tables per Direct Lake semantic model (F2) | 500 |
-| Max tables per Direct Lake semantic model (F64+) | 1,000 |
-| Max rows per table (Direct Lake, F2) | 300 million |
-| Max rows per table (Direct Lake, F64) | 1.5 billion |
-| Max columns per table (Direct Lake) | 500 |
+| Max rows per table (Direct Lake, F2–F32) | 300 million |
+| Max rows per table (Direct Lake, F64 / P1) | 1.5 billion |
+| Max Parquet files per table (Direct Lake, F2 / F64) | 1,000 / 5,000 |
+| Max row groups per table (Direct Lake, F2 / F64) | 1,000 / 5,000 |
+| Max model size on OneLake (Direct Lake, F2 / F16 / F64) | 10 GB / 20 GB / Unlimited |
 | XMLA read/write endpoint requirement | **Premium / Fabric F64+** capacity (read available at lower SKUs) |
 | Deployment pipeline stages (max) | **10** (Dev, Test, Prod, plus up to 7 custom stages) |
 | Workspace roles | **4**: Admin, Member, Contributor, Viewer |
@@ -180,7 +180,7 @@ flowchart LR
     style C fill:#1a3a5c,stroke:#4a9eff
 ```
 
-> **Exam Caveat:** RLS is defined in the **semantic model**, NOT in the Lakehouse or Warehouse. Users with Admin/Member roles **bypass** RLS when browsing data in the service.
+> **Exam Caveat:** RLS is defined in the **semantic model**, NOT in the Lakehouse or Warehouse. Users with **Admin, Member, or Contributor** roles (all have model edit access) **bypass** RLS when browsing data in the workspace — only **Viewers** (and read/build-only consumers) are subject to it.
 {: .warning }
 
 ---
@@ -190,7 +190,7 @@ flowchart LR
 | Criteria | Lakehouse | Warehouse | KQL Database | Eventhouse |
 |----------|-----------|-----------|--------------|------------|
 | **Query language** | Spark SQL, PySpark | T-SQL | KQL (Kusto) | KQL |
-| **File format** | Delta (Parquet) | Managed tables | Columnar time-series | Columnar time-series |
+| **File format** | Delta (Parquet) in OneLake | Delta (Parquet) in OneLake (T-SQL–managed) | Columnar time-series | Columnar time-series |
 | **Best for** | Data engineering, ML, ELT | Enterprise BI, complex joins, stored procs | Log/telemetry analytics | Streaming + real-time analytics |
 | **Schema** | Schema-on-read & schema-on-write | Schema-on-write (strict) | Semi-structured, schemaless | Semi-structured |
 | **Transactions** | ACID via Delta | Full T-SQL transactions | Append-optimized | Append-optimized |
@@ -228,24 +228,42 @@ flowchart LR
 | Where data lives | **OneLake** (Lakehouse or Warehouse) |
 | Framing | Snapshot of Delta log metadata; determines which Parquet files to read |
 | Refresh type | **Framing** (lightweight metadata update, not data copy) |
-| Automatic framing | Occurs when Fabric detects schema/data changes |
-| Fallback behavior | Falls back to **DirectQuery** when guardrails are exceeded |
-| Fallback triggers | Row count exceeds SKU limit, column count exceeds limit, unsupported DAX, or timeout |
-| Disable fallback | `DirectLakeBehavior = DontFallback` (query fails instead of going to DQ) |
+| Automatic updates | Auto-reframe when Fabric detects Delta data/schema changes → near-real-time with no schedule |
+| On-demand reframe | Via XMLA endpoint, Fabric refresh API, or pipeline (when auto-updates is off) |
+| Fallback behavior | **Direct Lake on SQL** only — falls back to **DirectQuery** via SQL endpoint. **Direct Lake on OneLake never falls back** (query/refresh errors instead) |
+| Fallback triggers (SQL flavour) | SQL view, SQL-based RLS/CLS, guardrails exceeded, unsupported scenario |
+| Disable fallback | `DirectLakeBehavior = DirectLakeOnly` (query errors instead of going to DQ) |
 | V-Order | Special sort order applied at write time; improves read performance dramatically |
 
 ```mermaid
 flowchart TD
-    Q["DAX Query Arrives"] --> G{Within SKU<br/>guardrails?}
-    G -- Yes --> DL["Direct Lake<br/>(read Parquet via memory)"]
-    G -- No --> FB{Fallback<br/>enabled?}
+    Q["DAX Query Arrives"] --> FLV{Which Direct<br/>Lake flavour?}
+    FLV -- "on OneLake" --> G1{Within SKU<br/>guardrails?}
+    G1 -- Yes --> DL["Direct Lake<br/>(read Parquet via memory)"]
+    G1 -- No --> ERR["Query / refresh ERROR<br/>(no fallback)"]
+    FLV -- "on SQL" --> G2{Servable<br/>in-memory?}
+    G2 -- Yes --> DL
+    G2 -- No --> FB{Fallback<br/>enabled?}
     FB -- Yes --> DQ["DirectQuery<br/>(SQL endpoint)"]
-    FB -- No --> ERR["Query Error"]
+    FB -- No --> ERR
     DL --> R["Return Results"]
     DQ --> R
 ```
 
-> **Exam Caveat:** Direct Lake **does not import data** into the model. It reads Parquet files directly from OneLake into memory on demand. Framing is NOT the same as a refresh — it only updates the Delta log pointer.
+### 🔀 On OneLake vs On SQL Analytics Endpoint
+
+| Aspect | Direct Lake **on OneLake** | Direct Lake **on SQL** |
+|--------|---------------------------|------------------------|
+| **Connector** | Azure Data Lake Storage (OneLake) | SQL Server / `OneLake.SqlAnalytics` |
+| **Data sources per model** | Multiple Fabric items (many lakehouses/warehouses) | Single lakehouse/warehouse |
+| **DirectQuery fallback** | ❌ Never (errors instead) | ✅ Yes (unless disabled) |
+| **Composite with Import/DQ** | ✅ Yes | ❌ No (only via a new composite in Desktop) |
+| **SQL-endpoint RLS/CLS/OLS** | ❌ Not applied (uses OneLake security) | ✅ Enforced (delegated identity) |
+| **SQL views as tables** | ❌ (use materialized view / Import) | ✅ but falls back to DirectQuery |
+| **Created from** | Service (OneLake catalog), Desktop, SQL endpoint page | SQL analytics endpoint page only |
+| **Guardrail exceeded** | Refresh fails; not queryable | Refresh warns; queries fall back to DQ |
+
+> **Exam Caveat:** Direct Lake **does not import data** into the model — it reads Parquet from OneLake into memory on demand, and a "refresh" is just **framing** (metadata pointer). The **on OneLake vs on SQL** distinction (fallback, multi-source, composite, security) is the new July 2026 exam objective.
 {: .warning }
 
 ---
@@ -255,19 +273,19 @@ flowchart TD
 1. **RLS is defined in the semantic model**, not in the Lakehouse, Warehouse, or data source.
 2. **Direct Lake requires Delta tables in OneLake** — no CSV, no Azure SQL, no external Parquet.
 3. **Viewers cannot build reports** on shared semantic models without **Build permission**.
-4. **Workspace Admin and Member roles bypass RLS** when browsing data directly in the service.
+4. **Workspace Admin, Member, and Contributor roles bypass RLS** when browsing data directly in the workspace (they have model edit access); only **Viewers** and read/build-only consumers are filtered by RLS.
 5. **XMLA read/write** requires at minimum **Power BI Premium Per User (PPU)** or **Fabric F64+** for write; read is available at lower SKUs.
 6. **Deployment pipelines** compare content between stages — they do **not** version-control code (use Git integration for that).
 7. **Incremental refresh** in Import mode creates partitions automatically — you configure the `RangeStart` and `RangeEnd` parameters, not partition logic.
 8. **Sensitivity labels** require **Microsoft Purview Information Protection**; they propagate downstream when data is exported.
 9. **SUMMARIZE should not be used to add new measure columns** — use `SUMMARIZECOLUMNS` or `ADDCOLUMNS(SUMMARIZE(...))` instead.
-10. **Composite models** can mix Import and DirectQuery tables, but Direct Lake tables **cannot** be mixed with Import tables in the same model.
+10. **Composite models** can mix Import and DirectQuery tables. **Direct Lake on OneLake** tables **can** now be mixed with Import tables in one model (web modeling / Desktop live edit); **Direct Lake on SQL** cannot — you'd build a new composite on top of it in Desktop.
 11. **Shortcuts are read-only** virtual references — they do not move, copy, or transform data.
 12. **CLS and OLS cannot be configured in Power BI Desktop** — they require XMLA endpoint or Tabular Editor.
 13. **Time intelligence functions require a Date table** marked as a date table with no gaps.
 14. **V-Order** is a write-time optimization — it must be applied when data is written to Delta, not at query time.
 15. **`KEEPFILTERS`** does not remove context; it **intersects** with existing filters. Contrast with `CALCULATE` which overrides.
-16. **Direct Lake fallback to DirectQuery** uses the SQL analytics endpoint — if that endpoint is down, queries fail.
+16. **Direct Lake fallback to DirectQuery** happens **only with Direct Lake on SQL** (via the SQL analytics endpoint). **Direct Lake on OneLake never falls back** — over-guardrail/unsupported queries error and refresh fails instead.
 17. **Git integration** in Fabric works at the **workspace level**, not at individual item level.
 18. **Dataflow Gen2** outputs to Lakehouse/Warehouse; it does **not** load directly into a semantic model like legacy Power BI dataflows could.
 19. **`USERELATIONSHIP`** only works with **inactive** relationships — you cannot reference a relationship that does not exist.
@@ -303,7 +321,8 @@ flowchart TD
 ### 📐 Domain 3 — Implement and Manage Semantic Models (25-30%)
 
 - [ ] I can choose between Import, DirectQuery, Direct Lake, and Composite storage modes
-- [ ] I know the Direct Lake guardrails, framing process, and fallback behavior
+- [ ] I can choose between **Direct Lake on OneLake** and **Direct Lake on SQL analytics endpoint** (multi-source, composite, fallback, SQL-endpoint security)
+- [ ] I know the Direct Lake guardrails, framing/refresh (auto-updates) process, and fallback behavior (SQL flavour only)
 - [ ] I can write CALCULATE with ALL, ALLEXCEPT, REMOVEFILTERS, and KEEPFILTERS
 - [ ] I understand iterator functions (SUMX, AVERAGEX, COUNTX, RANKX)
 - [ ] I know when to use SUMMARIZECOLUMNS vs. SUMMARIZE

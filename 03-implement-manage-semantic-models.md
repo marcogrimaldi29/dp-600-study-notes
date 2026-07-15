@@ -346,8 +346,11 @@ flowchart LR
 **Key design rules:**
 
 1. **Import + DirectQuery** — classic composite model; aggregation tables in Import accelerate DQ queries.
-2. **Direct Lake + DirectQuery** — Fabric scenario; core facts from Lakehouse, supplemental data from external SQL.
-3. **Relationships across storage modes** form a *limited relationship* (DirectQuery semantics apply to that join).
+2. **Direct Lake on OneLake + Import** — the modern Fabric composite: keep very large facts in Direct Lake, add smaller dimensions or analyst-owned tables in **Import** (with Power Query) — supported in **Power BI web modeling and Desktop live edit**. DirectQuery/Dual tables can be added with XMLA tools.
+3. **Direct Lake + DirectQuery** — core facts from a Lakehouse, supplemental data from external SQL.
+4. **Relationships across storage modes** form a *limited relationship* (DirectQuery semantics apply to that join).
+
+> ⚠️ **Exam Caveat:** Composite modelling that mixes Direct Lake with Import/DirectQuery in one model is a **Direct Lake on OneLake** capability. A **Direct Lake on SQL** model **cannot** contain other storage-mode tables directly — you must first build a composite *on top of it* in Power BI Desktop, which creates a new model that extends it with Import/DQ tables. (Older notes saying "Direct Lake can't mix with Import at all" are out of date.)
 
 > 🎯 **Exam Tip:** In a composite model, any relationship that crosses storage-mode boundaries is evaluated using **DirectQuery semantics**, even if one side is Import. This can affect performance — the exam tests awareness of this.
 
@@ -406,35 +409,55 @@ CALCULATE(
 flowchart LR
     LH[(Lakehouse<br/>Delta Tables<br/>V-Order Parquet)] -- framing --> DL[Direct Lake<br/>Semantic Model]
     DL -- query --> PBI[Power BI<br/>Reports]
-    DL -. fallback .-> DQ[DirectQuery<br/>SQL Endpoint]
+    DL -. "fallback (Direct Lake on SQL only)" .-> DQ[DirectQuery<br/>SQL Endpoint]
 ```
 
-#### Framing and V-Order
+#### Framing, V-Order, and Refresh Behaviour
 
-- **Framing** is the process by which the Direct Lake model takes a snapshot of the current Delta table version. A new frame is triggered on refresh or automatically when the model detects new data (depending on settings).
-- **V-Order** is a write-time optimisation applied to Parquet files in the Lakehouse that aligns data for fast VertiPaq reads. Always ensure V-Order is enabled for Direct Lake tables.
+- **Framing** is the process by which the Direct Lake model takes a snapshot (a "frame") of the current Delta table version — it records which Parquet files and row groups back each table. Data itself is **not** copied; only the pointers to the latest committed Delta files are updated. Queries then page column data into memory on demand (**transcoding**) the first time a column is touched.
+- A Direct Lake **refresh is just reframing** — a low-cost metadata operation that takes seconds, not a full data copy. This is the key contrast with Import mode, where refresh replicates the entire dataset.
+- **Automatic updates (auto-reframe)** — when enabled (default), the model reframes automatically after the source Delta tables change, so new data appears without a schedule. You can disable it and reframe **programmatically** (XMLA / Fabric API / pipeline) when you need controlled, transactionally consistent updates. Manual/scheduled refresh in the model still just triggers reframing.
+- **V-Order** is a write-time optimisation applied to Parquet files that aligns data for fast VertiPaq reads. Keep V-Order enabled and periodically run `OPTIMIZE` on Delta tables — poorly compacted tables (many small files / row groups) hurt Direct Lake performance and can push a table over its guardrails.
 
-#### Fallback Behaviour
+> 🎯 **Exam Tip:** "Configure Direct Lake, including default fallback and **refresh** behavior" is an explicit exam objective. Remember: a Direct Lake refresh = **framing** (metadata only), and *automatic updates* keep the model current without a scheduled refresh. Reframing on demand is done via the XMLA endpoint or the Fabric refresh API.
 
-| Setting | Behaviour |
-|---|---|
-| **Automatic fallback (default)** | If data exceeds guardrails or unsupported DAX is used, the engine silently falls back to DirectQuery via the SQL endpoint |
-| **Manual / disabled fallback** | Queries that cannot be served from Direct Lake will **fail** instead of falling back — useful when you want to guarantee in-memory speed |
+#### The Two Flavours: Direct Lake on OneLake vs Direct Lake on SQL
 
-Guardrails (per SKU) define thresholds for row count per table, column count, and model size. Exceeding them triggers fallback or failure.
+This is the skill the July 2026 update added — *"Choose between Direct Lake on OneLake and Direct Lake on SQL analytics endpoint."* Both load Delta data from OneLake into VertiPaq; they differ in **how the model discovers schema, enforces security, and what happens when a table can't be served in-memory**.
 
-> ⚠️ **Exam Caveat:** If Direct Lake fallback is **disabled** and a query exceeds guardrails, users will see an error — not a slow result. The exam may test your understanding of when to enable vs disable fallback.
-
-#### Direct Lake on OneLake vs SQL Endpoint
-
-| Aspect | Direct Lake on OneLake (default) | Direct Lake via SQL Endpoint |
+| Aspect | **Direct Lake on OneLake** | **Direct Lake on SQL** (analytics endpoint) |
 |---|---|---|
-| **Data source** | Delta Parquet files directly | SQL analytical endpoint of Lakehouse/Warehouse |
-| **Performance** | Best — no translation layer | Slight overhead from SQL layer |
-| **Use case** | Standard Fabric analytics | When you need SQL views, security, or transformations |
-| **Fallback target** | SQL endpoint (DirectQuery) | Same SQL endpoint |
+| **How the model connects** | Points **directly at the OneLake Delta storage** (Azure Data Lake Storage connector). Uses OneLake APIs for schema discovery, permission checks, and data loading | Points at the **SQL analytics endpoint** of one lakehouse/warehouse (SQL Server / `OneLake.SqlAnalytics` connector). Uses the endpoint for table/view discovery and permission checks; still loads data from OneLake Delta files |
+| **DirectQuery fallback** | **Never falls back.** If a table can't be served in-memory, the query/refresh **fails** (this is effectively `DirectLakeOnly` behaviour) | **Falls back to DirectQuery** via the SQL endpoint when needed — e.g. a SQL view, SQL-based RLS, or guardrails exceeded (unless fallback is disabled) |
+| **Data sources per model** | **Multiple** Fabric items — tables from several lakehouses / warehouses across workspaces in **one** model | **Single** Fabric item — tables (or views) from one lakehouse or warehouse only |
+| **Composite models** | **Supported** — combine Direct Lake tables with **Import** tables (web modeling) and **DirectQuery/Dual** tables (XMLA tools) | **Not supported** in the same model. You can still build a composite *on top of* it in Power BI Desktop, which extends it with new Import/DQ tables |
+| **Security enforcement** | OneLake security via **OneLake APIs**. SQL-endpoint RLS/CLS/OLS is **not** applied (user needs file access in OneLake). Semantic-model RLS/OLS still works | Honours **SQL analytics endpoint** RLS/CLS/OLS (delegated identity). SQL RLS causes fallback to DirectQuery |
+| **SQL views** | Not supported as a Direct Lake table (use a materialized view, or add the view as an Import/DQ table) | Supported, **but queries fall back to DirectQuery** |
+| **Calculated columns / tables** | Calculated tables and columns referencing Direct Lake tables supported (**preview**) | Not supported (except calc groups, what-if & field parameters) |
+| **Where you create it** | Power BI Desktop, Power BI service (**OneLake catalog → New semantic model**), or the SQL endpoint page | **Only** from the SQL analytics endpoint page (**New semantic model**); editable in Desktop afterwards |
+| **Guardrail exceeded** | Behaves like Import — **refresh fails**, model can't be queried until Delta tables are optimised | Refresh **succeeds with a warning**; queries **fall back to DirectQuery** (slower) if fallback enabled |
 
-> 🎯 **Exam Tip:** Direct Lake **always** reads the Delta files for primary queries. The SQL endpoint is used only as a **fallback** target when DirectQuery mode kicks in. Questions may try to confuse these two paths.
+**Choose Direct Lake on OneLake when** you want the best/most consistent performance, tables from **more than one** Fabric source, **composite** models with Import/DirectQuery, OneLake security, calculated columns/tables, or guaranteed no silent DirectQuery fallback (`DirectLakeOnly`).
+
+**Choose Direct Lake on SQL when** you must inherit **security rules defined in the SQL analytics endpoint** (RLS/CLS/OLS via delegated identity), your model is on a **single** lakehouse/warehouse, or you need unsupported cases (e.g. SQL **views**) to **fall back to DirectQuery** instead of failing.
+
+> ⚠️ **Exam Caveat:** The old mental model — *"Direct Lake always falls back to the SQL endpoint"* — is **only true for Direct Lake on SQL**. **Direct Lake on OneLake does not fall back at all**: an over-guardrail or unsupported query **errors / refresh fails** instead. Expect the exam to test this exact distinction.
+
+> 🎯 **Exam Tip:** Tell the two apart by the connector in TMDL/Model view — **Azure Data Lake Storage** ⇒ Direct Lake on OneLake; **SQL Server / `OneLake.SqlAnalytics`** ⇒ Direct Lake on SQL. When creating from the SQL endpoint page, the dialog **defaults to OneLake in user-identity mode** and **SQL in delegated mode**.
+
+#### Configuring Fallback (`DirectLakeBehavior`)
+
+For **Direct Lake on SQL**, the semantic-model property **`DirectLakeBehavior`** controls fallback:
+
+| Value | Behaviour |
+|---|---|
+| `Automatic` (default) | Serve from Direct Lake when possible; otherwise silently fall back to DirectQuery via the SQL endpoint |
+| `DirectLakeOnly` | Never fall back — queries that can't be served in-memory **error**. Use to guarantee VertiPaq speed and catch guardrail issues |
+| `DirectQueryOnly` | Force DirectQuery (mainly for testing/diagnostics) |
+
+Direct Lake on OneLake is inherently `DirectLakeOnly` — there is no SQL endpoint to fall back to.
+
+> ⚠️ **Exam Caveat:** With `DirectLakeOnly` (or any Direct Lake on OneLake model), a query exceeding SKU guardrails returns an **error**, not a slow result. Enabling fallback trades guaranteed speed for guaranteed answers.
 
 ---
 
@@ -479,8 +502,13 @@ Incremental refresh partitions a table by date so that only recent data is refre
 | 11 | Bridge table connects patients to multiple diagnoses | **Many-to-many** relationship through bridge; consider bi-directional filter or DAX with CROSSFILTER |
 | 12 | You want Prior Year to show as a percentage format but Current Year as currency | Use **dynamic format strings** on the calculation group items |
 | 13 | Need third-party tool (Tabular Editor) to deploy model metadata | Enable **XMLA read/write endpoint** (requires Premium / Fabric capacity) |
-| 14 | Direct Lake model must guarantee no silent performance degradation | **Disable automatic fallback** — queries that exceed guardrails will error instead of falling back to DQ |
+| 14 | Direct Lake model must guarantee no silent performance degradation | Set `DirectLakeBehavior = DirectLakeOnly` (or use **Direct Lake on OneLake**, which never falls back) — over-guardrail queries error instead of going to DQ |
 | 15 | Incremental refresh partitions keep growing and model won't publish | Enable **large model storage format** to support higher partition counts |
+| 16 | One semantic model must combine fact tables from **two different lakehouses** plus a warehouse | **Direct Lake on OneLake** — only it can source tables from multiple Fabric items in one model |
+| 17 | Reports must honour **RLS/CLS defined on the Warehouse SQL analytics endpoint** | **Direct Lake on SQL** (delegated identity) — it enforces SQL-endpoint security; OneLake flavour does not apply SQL RLS |
+| 18 | Large Direct Lake facts plus a small analyst-built dimension using Power Query, in one model | **Direct Lake on OneLake + Import** composite model |
+| 19 | Model built on a **SQL view**; view must still return results, not error | **Direct Lake on SQL** — queries on the view **fall back to DirectQuery** (OneLake can't use non-materialized views) |
+| 20 | Direct Lake data must appear near-real-time with no scheduled refresh | Enable **automatic updates (auto-reframe)** — the model reframes when the Delta tables change |
 
 ---
 

@@ -156,7 +156,7 @@ flowchart TD
 | **Engine** | Spark + SQL Analytics Endpoint | Full T-SQL | KQL |
 | **Write via T-SQL** | ❌ (read-only endpoint) | ✅ (INSERT, UPDATE, DELETE) | ❌ |
 | **Write via Spark** | ✅ | ❌ | ❌ |
-| **File format** | Delta (Parquet) | Proprietary (managed) | Columnar (KQL engine) |
+| **File format** | Delta (Parquet) in OneLake | Delta (Parquet) in OneLake (T-SQL–managed) | Columnar (KQL engine) |
 | **Schema enforcement** | Schema-on-read or schema-on-write | Schema-on-write (strict) | Schema-on-write |
 | **Unstructured files** | ✅ (Files/ folder) | ❌ | ❌ |
 | **Best for** | Data engineering, ML, flexible ETL | Enterprise DW, SQL-heavy BI | Real-time analytics, logs, IoT |
@@ -166,6 +166,9 @@ flowchart TD
 
 > **Exam Caveat:** A lakehouse has TWO entry points: (1) the Spark engine for read/write, and (2) the SQL analytics endpoint for read-only T-SQL. The exam frequently tests which operations are available on each.
 {: .warning }
+
+> **Exam Tip:** **Both** the Lakehouse and the Warehouse store their tables as **open Delta Parquet in OneLake** — the difference is the engine and write path (Spark vs full T-SQL), *not* the storage format. That shared Delta format is exactly why both can back a **Direct Lake** semantic model and be queried cross-engine. The Warehouse does *not* use a proprietary format.
+{: .note }
 
 ---
 
