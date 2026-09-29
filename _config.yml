@@ -27,7 +27,8 @@ personal_site_url:   "https://marcogrimaldi29.com"
 personal_site_label: "marcogrimaldi29.com"
 
 # ── GitHub repo (for "Edit this page" links) ──────────────
-gh_edit_link:         true
+# Off: corrections come in as issues, via the footer's "Spotted a mistake?" banner.
+gh_edit_link:         false
 gh_edit_link_text:    "Edit this page on GitHub ✏️"
 gh_edit_repository:   "https://github.com/marcogrimaldi29/dp-600-study-notes"
 gh_edit_branch:       "main"
