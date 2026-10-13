@@ -74,7 +74,7 @@ pie title DP-600 — Official Exam Domain Weights
 
 <div style="border:1px solid #b388ff; border-radius:8px; padding:1rem; background:#2d2f31;">
 <h3 style="margin-top:0;">🔄 Domain 2 — Prepare Data</h3>
-<p><strong>45–50%</strong> of exam. Data connections, star schemas, transforms, SQL, KQL, DAX, Visual Query Editor.</p>
+<p><strong>45–50%</strong> of exam. Data connections, star schemas, transforms, SQL, KQL, DAX, Visual query editor.</p>
 <a href="./02-prepare-data/" class="btn btn-outline fs-5">Read →</a>
 </div>
 
@@ -155,11 +155,11 @@ flowchart LR
 | Resource | Link |
 |----------|------|
 | 🎓 Microsoft Certification Path | [Fabric Analytics Engineer Associate](https://learn.microsoft.com/en-us/credentials/certifications/fabric-analytics-engineer-associate/) |
-| 📋 Skills Measured Guide | [Official Study Guide](https://learn.microsoft.com/en-gb/credentials/certifications/resources/study-guides/dp-600) |
+| 📋 Skills Measured Guide | [Official Study Guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-600) |
 | 🧪 Free Practice Assessment | [Practice Test](https://learn.microsoft.com/en-us/credentials/certifications/exams/dp-600/practice/assessment?assessment-type=practice&assessmentId=90) |
 | 📚 Microsoft Fabric Documentation | [Fabric Docs](https://learn.microsoft.com/en-us/fabric/) |
-| 🎬 Exam Readiness Videos | [Exam Readiness Zone](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-dp-600-plan-implement-and-manage-a-solution-for-data-analytics) |
-| 💶 EU Exam Booking | [Pearson VUE Microsoft](https://home.pearsonvue.com/microsoft) |
+| 🎬 Exam Readiness Videos | Exam Readiness Zone: [Domain 1](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-dp-600-maintain-a-data-analytics-solution) · [Domain 2](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-dp-600-prepare-data) · [Domain 3](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-dp-600-implement-and-manage-semantic-models) |
+| 💶 EU Exam Booking | [Pearson VUE Microsoft](https://www.pearsonvue.com/us/en/microsoft.html) |
 
 ---
 
@@ -171,7 +171,11 @@ These notes are hosted on **GitHub Pages** and published as a searchable website
 
 The site includes full-text search, Mermaid diagram rendering, and mobile-friendly navigation for on-the-go review.
 
-These notes are designed to be a structured, exam-focused summary of the most important concepts and services based on the official **[Microsoft DP-600 Study Guide](https://learn.microsoft.com/en-gb/credentials/certifications/resources/study-guides/dp-600)** and its criteria.
+These notes are designed to be a structured, exam-focused summary of the most important concepts and services based on the official **[Microsoft DP-600 Study Guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-600)** and its criteria.
+
+Additional resources and study notes maintained by me, such as the **[📘 AZ-305 Study Notes](https://marcogrimaldi29.com/az-305-study-notes/)**, the **[📘 DP-700 Study Notes](https://marcogrimaldi29.com/dp-700-study-notes/)**, and more, are also available for those pursuing the Microsoft and Azure certifications at the following Landing Page:
+
+👉 **[📘 Study Notes Hub](https://marcogrimaldi29.com/study-notes/)**
 
 ---
 
@@ -181,7 +185,7 @@ These notes are maintained by **[Marco Grimaldi](https://www.linkedin.com/in/mar
 
 📍 **Find more content at [🏠 marcogrimaldi29.com](https://marcogrimaldi29.com)**
 
-> The website is continuously updated and based on my personal study notes and experiences. If you have any feedback, suggestions, or corrections, feel free to [reach out](https://marcogrimaldi29.com/contact/)**!
+> The website is continuously updated and based on my personal study notes and experiences. If you have any feedback, suggestions, or corrections, feel free to [reach out](https://marcogrimaldi29.com/contact/)!
 
 ---
 
@@ -195,6 +199,6 @@ This site uses [Umami](https://umami.is/) for privacy-friendly analytics.
 
 The [Just the Docs](https://github.com/just-the-docs/just-the-docs) theme is used for a clean, documentation-style layout. Licensed under [MIT](https://opensource.org/license/MIT).
 
-Created with the help of AI. Model used: [Claude Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6). The content has been reviewed and edited by the author for accuracy and clarity, but may contain errors. Always verify against the latest [Microsoft documentation](https://learn.microsoft.com/en-us/fabric/).
+Created with the help of AI (Claude by [Anthropic](https://www.anthropic.com/)). The content has been reviewed and edited by the author for accuracy and clarity, but may contain errors. Always verify against the latest [Microsoft documentation](https://learn.microsoft.com/en-us/fabric/).
 
 > *Not affiliated with or endorsed by Microsoft.*

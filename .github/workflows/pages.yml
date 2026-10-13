@@ -1,6 +1,6 @@
 ##############################################################
 # GitHub Actions — Deploy Jekyll site to GitHub Pages
-# Triggers on every push to main branch
+# Triggers on every push to master branch
 ##############################################################
 
 name: "Deploy to GitHub Pages"

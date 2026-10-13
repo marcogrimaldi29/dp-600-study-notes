@@ -36,7 +36,8 @@ Microsoft Fabric is a **SaaS analytics platform** that unifies data engineering,
 | **Data Warehouse** | Full T-SQL warehouse with DML/DDL |
 | **Data Science** | ML models, experiments, notebooks with MLflow |
 | **Real-Time Intelligence** | KQL databases, eventstreams, Real-Time dashboards |
-| **Data Factory** | Dataflows Gen2, data pipelines (orchestration) |
+| **Data Factory** | Dataflows Gen2, pipelines (orchestration), Copy job, Mirroring |
+| **Databases** | SQL database in Fabric (OLTP), Cosmos DB in Fabric (NoSQL) |
 | **Power BI** | Semantic models, reports, dashboards, paginated reports |
 
 ```mermaid
@@ -47,12 +48,14 @@ graph TD
     Fabric --> DS["Data Science"]
     Fabric --> RTI["Real-Time Intelligence"]
     Fabric --> DF["Data Factory"]
+    Fabric --> DB["Databases"]
     Fabric --> PBI["Power BI"]
     DE --> OL["OneLake (ADLS Gen2)"]
     DW --> OL
     DS --> OL
     RTI --> OL
     DF --> OL
+    DB --> OL
     PBI --> OL
 ```
 
@@ -72,7 +75,7 @@ OneLake is Fabric's **single, unified data lake** for the entire tenant. Think o
 - **One copy of data** — all Fabric workloads access the same physical files, eliminating silos and redundant copies.
 - **Delta Parquet format** — tables are stored as Delta Lake (Parquet files plus a `_delta_log` transaction log).
 - **Shortcuts** — virtual pointers to data in external locations (other OneLake paths, ADLS Gen2, Amazon S3, Google Cloud Storage) without copying.
-- **Hierarchical namespace** — organizes data as `onelake://<workspace>/<item>/<path>`.
+- **Hierarchical namespace** — organizes data as workspace → item → folders, addressable with ADLS Gen2 paths such as `abfss://<workspace>@onelake.dfs.fabric.microsoft.com/<item>.<itemtype>/Tables/<table>`.
 - **Automatic discovery** — every Fabric item that produces data lands in OneLake automatically.
 
 > **Exam Caveat:** Shortcuts do **not** copy data. They create a reference. If the source is deleted or access is revoked, the shortcut breaks. Expect scenario questions about this.
@@ -109,9 +112,9 @@ A lakehouse combines the flexibility of a data lake with the query power of a wa
 
 - **Tables section** — managed Delta Lake tables queryable via Spark and the SQL analytics endpoint.
 - **Files section** — unstructured or semi-structured files (CSV, JSON, images) stored in OneLake but not registered as tables.
-- **SQL analytics endpoint** — an auto-generated, **read-only** T-SQL endpoint that lets you query Delta tables using SQL without Spark. Supports SELECT statements, views, and SQL functions but **no INSERT, UPDATE, DELETE, or DDL**.
+- **SQL analytics endpoint** — an auto-generated, **read-only** T-SQL endpoint that lets you query Delta tables using SQL without Spark. You can create **views, functions, and stored procedures** and apply **SQL security (RLS, CLS, OLS, dynamic data masking)**, but you **cannot create tables or run INSERT, UPDATE, or DELETE**.
 
-> **Exam Caveat:** The SQL analytics endpoint is **read-only**. You cannot run DML against a lakehouse via T-SQL. If a question asks you to perform T-SQL writes, the answer involves a warehouse, not a lakehouse endpoint.
+> **Exam Caveat:** The SQL analytics endpoint is **read-only for data**. You cannot run DML or create tables against a lakehouse via T-SQL. If a question asks you to perform T-SQL writes, the answer involves a warehouse, not a lakehouse endpoint.
 {: .warning }
 
 ### ✅ When to Use a Lakehouse
@@ -129,8 +132,9 @@ A Fabric warehouse is a **full relational data warehouse** with complete T-SQL D
 
 ### 🔧 Key Capabilities
 
-- **Full DML** — INSERT, UPDATE, DELETE, MERGE, COPY INTO.
+- **Full DML** — INSERT, UPDATE, DELETE, MERGE (GA), COPY INTO.
 - **Full DDL** — CREATE TABLE, ALTER TABLE, CREATE VIEW, CREATE SCHEMA, stored procedures.
+- **Surrogate keys** — `BIGINT IDENTITY` columns (system-managed; unique but not sequential).
 - **Cross-database queries** — query tables across warehouses and lakehouse SQL endpoints in the same workspace using three-part naming.
 - **Security** — column-level security, row-level security, dynamic data masking, object-level permissions.
 
@@ -140,7 +144,7 @@ graph TD
     Q -->|Yes| WH["Use Warehouse"]
     Q -->|No| Q2["Primary engine is Spark?"]
     Q2 -->|Yes| LH["Use Lakehouse"]
-    Q2 -->|No| Q3["Need fine-grained SQL security?"]
+    Q2 -->|No| Q3["Need multi-table transactions?"]
     Q3 -->|Yes| WH
     Q3 -->|No| LH
 ```
@@ -153,7 +157,7 @@ graph TD
 | Write via T-SQL | No (read-only SQL endpoint) | Yes (full DML/DDL) |
 | Write via Spark | Yes | No |
 | Cross-database queries | As a source (read) | Full support |
-| Row/column-level security | Not via SQL endpoint | Yes |
+| Row/column-level security | Yes — T-SQL RLS/CLS on the SQL endpoint, or OneLake security roles | Yes (T-SQL RLS/CLS) |
 | Best for | Engineers, data scientists | Analysts, SQL-centric teams |
 
 > **Exam Tip:** Both lakehouse and warehouse store data as Delta Parquet in OneLake. The difference is the **engine and write path**, not the storage format.
@@ -167,23 +171,23 @@ Fabric compute is metered through **Capacity Units (CUs)**. Every operation — 
 
 ### 💲 SKU Overview
 
-| SKU | Type | CUs | Typical Use |
+| SKU | CUs | Power BI equivalent | Free-license viewers can consume Power BI content? |
 |---|---|---|---|
-| F2 | Fabric (Azure) | 2 | Dev/test |
-| F4 | Fabric (Azure) | 4 | Small workloads |
-| F8 | Fabric (Azure) | 8 | Small team |
-| F16 | Fabric (Azure) | 16 | Departmental |
-| F32 | Fabric (Azure) | 32 | Departmental |
-| F64 | Fabric (Azure) | 64 | Enterprise |
-| F128+ | Fabric (Azure) | 128+ | Large enterprise |
-| P1 | Power BI Premium | 8 CU equiv. | Power BI + limited Fabric |
-| P2 | Power BI Premium | 16 CU equiv. | Power BI + limited Fabric |
+| F2 / F4 | 2 / 4 | — | ❌ (viewers need Pro/PPU) |
+| F8 | 8 | A1 | ❌ |
+| F16 | 16 | A2 | ❌ |
+| F32 | 32 | A3 | ❌ |
+| **F64** | **64** | **P1** (8 v-cores) | ✅ |
+| F128 | 128 | P2 | ✅ |
+| F256+ | 256+ | P3–P5 | ✅ |
+| Trial | 64 | — | ✅ (acts like F64) |
 
-- **F SKUs** — purchased through Azure, pay-as-you-go or reserved (1-year / 3-year). Support all Fabric workloads. Can be paused to stop billing.
-- **P SKUs** — legacy Power BI Premium per-capacity. P1 maps roughly to F8. Microsoft is encouraging migration to F SKUs.
-- **Trial capacity** — free 60-day trial with F64-equivalent capacity; one trial per user.
+- **F SKUs** — purchased through Azure, pay-as-you-go or reserved. **Every F SKU runs every Fabric workload** — smaller SKUs just have less compute. Can be scaled and **paused** to stop billing.
+- **P SKUs** — legacy Power BI Premium per-capacity, **being retired**; **P1 = F64**, P2 = F128. New deployments should use F SKUs.
+- **PPU (Premium Per User)** — a per-user Power BI license, **not** a Fabric capacity: it can't run lakehouses, warehouses, or notebooks.
+- **Trial capacity** — free 60-day trial with F64-equivalent capacity.
 
-> **Exam Caveat:** F SKUs can be **paused** (stopping all compute billing), but P SKUs cannot. Also, only F64 and above (or P1 and above) support Fabric features beyond Power BI. Lower F SKUs still run all workloads but with less throughput.
+> **Exam Caveat:** The F64 line is about **licensing, not features**. On **F64 or larger** (or any P SKU), users with only a Free license and the **Viewer** role can consume Power BI content. **Below F64**, every Power BI consumer needs a **Pro or PPU** license — even though the capacity still runs all Fabric workloads. Also, F SKUs can be **paused**; P SKUs cannot.
 {: .warning }
 
 ---
@@ -201,10 +205,11 @@ Delta Lake is the default table format across all of Fabric. Understanding it is
 
 ### 🚀 Fabric-Specific Optimizations
 
-- **V-Order** — a Fabric-specific write-time optimization that reorders Parquet row groups for faster reads across all engines (Spark, SQL, Power BI Direct Lake). V-Order is enabled by default.
-- **Optimize Write** — dynamically coalesces small files into larger ones during write to reduce the small-file problem. Also enabled by default in Fabric.
+- **V-Order** — a Fabric-specific write-time optimization that sorts and compresses Parquet files for faster reads, especially by **Power BI Direct Lake** (and, to a lesser degree, the SQL engines). It adds write cost and gives Spark no inherent read benefit.
+- **Optimize Write** — bin-packs data before writing to reduce the small-file problem.
+- **Resource profiles** — predefined Spark configuration sets. **New workspaces default to `writeHeavy`**, which has **V-Order disabled** (`spark.sql.parquet.vorder.default=false`). Switch to **`readHeavyForPBI`** (V-Order on, Optimize Write on) for tables consumed by Direct Lake, or `readHeavyForSpark` for Spark-read workloads.
 
-> **Exam Tip:** V-Order and Optimize Write are **enabled by default** in Fabric Spark. You do not need to turn them on. Expect questions that try to trick you into manually enabling settings that are already active.
+> **Exam Tip:** V-Order is **not** on by default in new workspaces. If a scenario asks how to speed up a **Direct Lake** model over Spark-written tables, enable V-Order (session setting, table property `delta.parquet.vorder.enabled`, or the `readHeavyForPBI` profile) and run `OPTIMIZE ... VORDER` on existing tables.
 {: .note }
 
 ---
@@ -223,7 +228,7 @@ Power BI is both a standalone workload and the analytics layer that sits on top 
 ### 🔌 Integration with Fabric Items
 
 - **Direct Lake mode** — a new storage mode where Power BI reads Delta Parquet files directly from OneLake without import or DirectQuery. Combines import-speed performance with DirectQuery-level freshness.
-- **Default semantic model** — every lakehouse and warehouse auto-generates a default semantic model that analysts can connect to immediately.
+- **No more default semantic models** — since **September 5, 2025**, creating a lakehouse, warehouse, or mirrored database no longer auto-creates a "default" semantic model, and existing ones were decoupled into independent semantic models by November 30, 2025. You now **create a semantic model explicitly** and choose its tables.
 - **SQL analytics endpoint** — Power BI can also use DirectQuery against a lakehouse SQL endpoint or warehouse.
 
 > **Exam Caveat:** Direct Lake is **not** the same as DirectQuery. Direct Lake reads columnar data from Parquet files in memory — it does not issue SQL queries to a source. Fallback to DirectQuery only applies to **Direct Lake on SQL analytics endpoint** (and can be disabled); **Direct Lake on OneLake never falls back** — an unsupported or over-guardrail query errors instead. See Domain 3 for the full OneLake-vs-SQL comparison.
@@ -276,6 +281,8 @@ The star schema is the recommended modeling pattern for analytical workloads in 
 | Stream IoT events and query with KQL | Real-Time Intelligence | Eventstreams and KQL databases handle streaming data |
 | Need cross-database SQL joins across items | Warehouse | Cross-database queries with three-part naming |
 | Store unstructured images alongside tabular data | Lakehouse (Files section) | Files section holds any format; tables hold Delta only |
+| Operational app needs high-frequency row updates (OLTP) | SQL database in Fabric | Transactional engine, auto-replicated to OneLake for analytics |
+| Replicate an Azure SQL / Snowflake / Cosmos DB source for reporting with minimal setup | Mirroring | Free, continuous CDC replica in OneLake with a SQL analytics endpoint |
 
 ---
 

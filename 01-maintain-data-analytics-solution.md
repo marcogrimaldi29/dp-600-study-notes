@@ -65,29 +65,32 @@ graph TD
     A --> C["Column-Level Security (CLS)"]
     A --> D["Object-Level Security (OLS)"]
     A --> E["File-Level Access Control"]
-    B --> B1["Filters rows via DAX expressions"]
-    C --> C1["Restricts columns from queries"]
-    D --> D1["Hides tables or columns from metadata"]
-    E --> E1["OneLake RBAC / folder permissions"]
+    B --> B1["Filters rows (DAX in semantic models, T-SQL in Warehouse / SQL endpoint)"]
+    C --> C1["Restricts columns (T-SQL GRANT in Warehouse / SQL endpoint, OneLake security)"]
+    D --> D1["Hides tables or columns, including metadata (semantic model OLS)"]
+    E --> E1["OneLake security roles (folders, tables, rows, columns)"]
 ```
+
+Security can be defined at **two layers**: the **data store** (Warehouse / SQL analytics endpoint T-SQL security, or OneLake security roles on a lakehouse) and the **semantic model** (roles with DAX filters and object permissions).
 
 | Feature | RLS | CLS | OLS |
 |---|---|---|---|
-| **What it restricts** | Rows returned by queries | Specific columns | Entire tables or columns from client metadata |
-| **Defined where** | DAX filter expression on roles in the semantic model | Model roles using column permissions | Model roles using object metadata permissions |
-| **Supported in** | Power BI Desktop, XMLA endpoint, Tabular Editor | XMLA endpoint, Tabular Editor | XMLA endpoint, Tabular Editor |
-| **User experience** | Data appears filtered; schema is visible | Column returns errors or blanks | Table or column is invisible to the user |
-| **Can be authored in Power BI Desktop?** | ✅ | ❌ | ❌ |
+| **What it restricts** | Rows returned by queries | Specific columns (query fails if it touches them) | Entire tables or columns — data **and** metadata |
+| **Semantic model** | DAX filter on a role | Implemented as **OLS on columns** (`metadataPermission: none`) | Role `tablePermission` / `columnPermission` with `metadataPermission: none` |
+| **Warehouse / SQL endpoint** | `CREATE SECURITY POLICY` + predicate function | `GRANT SELECT ON t(col1, col2)` / `DENY` | `GRANT` / `DENY` on objects |
+| **Lakehouse (OneLake security)** | Row filter in a OneLake security role | Column selection in a OneLake security role | Table/folder scope of a role |
+| **Authored in Power BI Desktop?** | ✅ Manage roles UI (also web modeling) | ✅ via **TMDL view** (no dedicated UI) | ✅ via **TMDL view** (no dedicated UI) |
+| **User experience** | Data appears filtered; schema is visible | Column errors out | Object behaves as if it doesn't exist |
 
-- **RLS** uses DAX predicates (e.g., `[Region] = USERPRINCIPALNAME()`) to restrict which rows a user sees. You assign users or security groups to roles.
-- **CLS** prevents specific columns from being queried at all. It must be configured via external tooling such as Tabular Editor or XMLA scripts.
-- **OLS** removes objects (tables or columns) from the model metadata so clients cannot even discover them. Also requires external tooling.
-- **File-level access control** applies to files in OneLake. OneLake folder-level RBAC (role-based access control) restricts read access at the folder or file level inside a lakehouse, independent of the semantic model layer.
+- **RLS** uses DAX predicates (e.g., `[Region] = USERPRINCIPALNAME()`) to restrict which rows a user sees. You assign users or security groups to roles in the service, and validate with **Test as role** (service) or **View as** (Desktop).
+- **OLS** (semantic model) removes tables or columns from what a role can see — clients can't even discover them, and measures that reference them are implicitly secured. Define it in **TMDL view** in Power BI Desktop (a `createOrReplace` role script) or in **Tabular Editor** / XMLA tools.
+- **CLS** is the term used for column permissions in the **Warehouse / SQL analytics endpoint** (T-SQL `GRANT`) and in **OneLake security**. In a semantic model, column-level security *is* column-level OLS.
+- **File-level access control** uses **OneLake security** roles: an Admin or Member defines roles on a lakehouse that grant Read (or ReadWrite) on specific folders, tables, or schemas, optionally with row- and column-level rules. These are enforced across Spark, the SQL endpoint (user's identity mode), and Direct Lake on OneLake.
 
-> **Exam Caveat:** CLS and OLS **cannot** be configured in Power BI Desktop. The exam may present a scenario asking the simplest tool to set up CLS — the answer involves the XMLA endpoint or Tabular Editor, not Desktop.
+> **Exam Caveat:** OLS no longer *requires* an external tool — Power BI Desktop's **TMDL view** can script it. There is still no point-and-click OLS UI in Desktop, so Tabular Editor remains the classic answer. Read the options carefully: "only Tabular Editor/XMLA can do this" is now outdated.
 {: .warning }
 
-> **Exam Tip:** RLS is enforced for Viewers and users with only Read/Build permission. Workspace Admins, Members, and Contributors are **not** subject to RLS when browsing data inside the workspace — they see all rows. RLS is enforced for these roles only when they consume content through an app or a shared link.
+> **Exam Tip:** Semantic-model RLS and OLS apply **only to Viewers** (and users given Read/Build without a workspace role, e.g., via an app or sharing). Workspace **Admins, Members, and Contributors** have edit permission on the model, so RLS/OLS **never** applies to them — however they open the content. OneLake security roles behave the same way: they only restrict Viewers and Read-only users.
 {: .note }
 
 ### 🏷️ Sensitivity Labels (Microsoft Purview Information Protection)
@@ -96,7 +99,7 @@ Sensitivity labels (Confidential, Highly Confidential, General, etc.) can be app
 
 Key points for the exam:
 
-- Labels are defined in the Microsoft Purview compliance portal, not in Fabric.
+- Labels are defined in the Microsoft Purview portal, not in Fabric.
 - Assigning labels in Fabric requires the user to have an appropriate Purview license and the label to be published to them via a label policy.
 - Labels persist when data is exported to Excel or PDF (the file carries the label's protection settings).
 - Mandatory labeling can be enforced via tenant settings so that users must classify items before saving.
@@ -108,15 +111,15 @@ Key points for the exam:
 
 Endorsement signals to consumers which items are trustworthy and authoritative.
 
-| Aspect | Promoted | Certified |
-|---|---|---|
-| **Who can apply** | Any workspace Member or Admin | Only users explicitly authorized by the Fabric/Power BI admin |
-| **Admin configuration required** | No | Yes — admin must designate which users or groups can certify |
-| **Visual indicator** | Blue badge | Green badge with checkmark |
-| **Intended use** | "This item is ready for broad use" | "This item meets organizational quality and standards" |
-| **Governance implication** | Low barrier — self-service | High barrier — organizational control |
+| Aspect | Promoted | Certified | Master data |
+|---|---|---|---|
+| **Who can apply** | Anyone with **write permission** on the item (incl. Contributors) | Only reviewers authorized by the Fabric admin (security groups), who also have write permission | Only users authorized by the Fabric admin, who also have write permission |
+| **Admin configuration required** | No | Yes — tenant setting + certifier groups (can be delegated to **domain admins**) | Yes — *Endorse master data* tenant setting + authorized users |
+| **Applies to** | All items except Power BI dashboards | All items except Power BI dashboards | **Data items only** (e.g., lakehouses, semantic models) |
+| **Intended use** | "This item is ready for sharing and reuse" | "This item meets organizational quality standards" | "This is the authoritative, single source of truth for this data" |
+| **Governance implication** | Low barrier — self-service | High barrier — organizational control | High barrier — core reference data |
 
-> **Exam Caveat:** Certification requires two things: (1) the Fabric admin has enabled certification and designated certifiers, and (2) the certifying user has at least a Member or Admin role on the workspace. Without both, certification is not possible.
+> **Exam Caveat:** Certification requires two things: (1) a Fabric admin (or a domain admin, if delegated) has enabled certification and authorized the reviewer, and (2) the reviewer has **write permission** on the item. Any user can *request* certification, but only authorized reviewers can apply it.
 {: .warning }
 
 ---
@@ -125,7 +128,7 @@ Endorsement signals to consumers which items are trustworthy and authoritative.
 
 ### 🔀 Version Control for a Workspace (Git Integration)
 
-Fabric workspaces can connect to a remote Git repository in **Azure DevOps** or **GitHub**. This enables source control for items such as semantic models, reports, notebooks, and pipelines.
+Fabric workspaces can connect to a remote Git repository in **Azure DevOps**, **GitHub**, or **GitHub Enterprise** (cloud-hosted only). This enables source control for items such as semantic models, reports, notebooks, lakehouses, warehouses, and pipelines.
 
 ```mermaid
 flowchart LR
@@ -143,9 +146,10 @@ flowchart LR
 
 **Configuration steps:**
 
-1. Open Workspace settings and navigate to Git integration.
-2. Connect to an Azure DevOps or GitHub repository and select a branch and folder.
+1. Open Workspace settings and navigate to Git integration (only a **workspace Admin** can connect the repository).
+2. Connect to an Azure DevOps, GitHub, or GitHub Enterprise repository and select a branch and folder.
 3. Items in the workspace are synced to/from the branch. Changes made in the workspace appear as uncommitted; the user commits when ready.
+4. To work in isolation, use **Branch out to another workspace** from the Source control pane — it creates a feature branch *and* a feature workspace connected to it.
 
 **Branching strategies the exam expects you to know:**
 
@@ -153,12 +157,12 @@ flowchart LR
 - **Feature branching:** Developers create short-lived branches, make changes, and merge via pull request. Recommended for team collaboration.
 - **Environment branching:** Separate branches map to Dev, Test, and Prod workspaces (often combined with deployment pipelines).
 
-> **Exam Tip:** Git integration in Fabric currently supports connecting **one branch per workspace**. If a question asks how two developers work on different features simultaneously, the answer involves creating separate feature branches and separate workspaces (or working locally with PBIP files).
+> **Exam Tip:** Git integration in Fabric connects **one branch per workspace**. If a question asks how two developers work on different features simultaneously, the answer involves separate feature branches and separate workspaces (**Branch out to another workspace**), or working locally with PBIP files.
 {: .note }
 
 ### 📁 Power BI Desktop Projects (.pbip)
 
-The PBIP format saves a Power BI project as a folder structure with human-readable JSON files instead of a single compressed binary file.
+The PBIP format saves a Power BI project as a folder structure of human-readable text files instead of a single compressed binary file. The report is saved in **PBIR** format (one JSON file per page, visual, and bookmark — now GA and the default) and the semantic model in **TMDL** (one file per table, role, culture, etc.).
 
 | Aspect | .pbix | .pbip |
 |---|---|---|
@@ -172,17 +176,19 @@ The PBIP format saves a Power BI project as a folder structure with human-readab
 **PBIP folder structure:**
 
 ```
-MyReport.pbip
-MyReport/
-  report.json
-  definition/
-    ...
-MyModel/
-  model.bim  (or definition/ folder)
-  ...
+project/
+├── Sales.pbip                      ← entry point (opens report + model)
+├── Sales.Report/
+│   ├── definition.pbir             ← required; points to the semantic model
+│   └── definition/                 ← PBIR: pages/, visuals/, report.json …
+├── Sales.SemanticModel/
+│   ├── definition.pbism            ← required
+│   └── definition/                 ← TMDL: tables/, relationships.tmdl …
+│                                     (or model.bim if saved as TMSL)
+└── .gitignore                      ← excludes .pbi/localSettings.json & cache.abf
 ```
 
-> **Exam Caveat:** PBIP is the recommended format for Git-based workflows but is **not** a replacement for PBIX in all scenarios. You cannot directly upload a PBIP folder to the Power BI service as a single action the way you upload a PBIX file. PBIP is designed for developer workflows and source control.
+> **Exam Caveat:** PBIP is the recommended format for Git-based workflows but is **not** a replacement for PBIX in all scenarios. There is no "upload a folder" action like uploading a PBIX — you publish from Desktop or sync the files through **Fabric Git integration** / Fabric item APIs. PBIP is designed for developer workflows and source control.
 {: .warning }
 
 ### 🚀 Deployment Pipelines
@@ -204,8 +210,9 @@ flowchart LR
 - Each stage maps to a Fabric workspace.
 - You can **compare stages** to see which items differ, which are new, and which are missing.
 - **Deployment rules** allow you to change parameters (data source connection strings, lakehouse references) at each stage so that Test points to test data and Prod points to production data.
-- You need at least a **Member or Admin** role in both the source and target workspaces to deploy.
+- To deploy you must be a **pipeline admin** *and* at least a **Contributor** in both the source and target workspaces. Assigning a workspace to a stage requires workspace **Admin**.
 - Pipelines support selective deployment — you can choose specific items rather than deploying everything.
+- Most semantic models **auto-bind** to the paired item in the target stage, but a **Direct Lake semantic model does not** — it keeps pointing at the source-stage lakehouse/warehouse until you add a data source rule.
 
 **Deployment rules** are critical for the exam. They allow overriding:
 
@@ -257,7 +264,7 @@ The XMLA (XML for Analysis) endpoint exposes Power BI semantic models using the 
 > **Exam Caveat:** Read/write XMLA is **disabled by default**. If a question describes a scenario where a developer cannot deploy changes via Tabular Editor, check whether the XMLA read/write setting is enabled at the tenant or capacity level.
 {: .warning }
 
-> **Exam Tip:** Changes made via XMLA **do not appear** in the standard Power BI Desktop round-trip. If someone modifies a model through Tabular Editor and then another developer opens the PBIX in Desktop and republishes, the XMLA changes may be overwritten. This is a governance concern the exam may test.
+> **Exam Tip:** Changes made via XMLA **do not appear** in the standard Power BI Desktop round-trip. If someone modifies a model through Tabular Editor and then another developer opens the PBIX in Desktop and republishes, the XMLA changes may be overwritten. Also, once a model has been modified or published through the XMLA endpoint, it **can no longer be downloaded as a .pbix** from the service. This is a governance concern the exam may test.
 {: .note }
 
 ### ♻️ Reusable Assets
@@ -280,7 +287,7 @@ A PBIDS file contains pre-configured data source connection information (server,
 Shared semantic models enable a "single version of truth" pattern. A central team publishes a certified semantic model, and report creators across the organization build reports on top of it using a live connection or DirectQuery connection.
 
 - Consumers need **Build permission** on the semantic model.
-- Shared semantic models appear in the OneLake data hub for discovery.
+- Shared semantic models appear in the **OneLake catalog** (formerly the OneLake data hub) for discovery.
 - Combining shared semantic models with endorsement (Certified) and sensitivity labels creates a governed, reusable data layer.
 
 ```mermaid
@@ -303,10 +310,10 @@ flowchart TD
 | # | Scenario | Answer |
 |---|---|---|
 | 1 | A user needs to create reports on a semantic model but has no workspace role. | Grant **Build permission** on the semantic model via sharing. |
-| 2 | A developer needs to configure OLS to hide a salary column from most users. | Use **Tabular Editor** via the **XMLA read/write endpoint**. Cannot be done in Power BI Desktop. |
+| 2 | A developer needs to configure OLS to hide a salary column from most users. | Define the role's column permission (`metadataPermission: none`) in Power BI Desktop's **TMDL view**, or with **Tabular Editor** via the **XMLA read/write endpoint**. There is no point-and-click OLS UI. |
 | 3 | The team wants to track changes to a semantic model over time with meaningful diffs. | Use the **PBIP** format and store it in a **Git repository**. |
 | 4 | The Test workspace needs to point to a test SQL database after deployment. | Configure **deployment rules** in the deployment pipeline to override the connection string. |
-| 5 | A workspace Admin wants to ensure only authorized users can mark items as Certified. | The **Fabric admin** must enable certification and designate specific certifiers in the admin portal. |
+| 5 | A workspace Admin wants to ensure only authorized users can mark items as Certified. | The **Fabric admin** must enable certification and designate certifier security groups in the admin portal (optionally delegated to domain admins). |
 | 6 | An exported Excel file from a Highly Confidential report must retain protection. | **Sensitivity labels** propagate to exports automatically — no extra configuration needed. |
 | 7 | Two developers want to work on separate features in the same Fabric workspace simultaneously. | Each developer creates a **feature branch** linked to a **separate workspace**, then merges via pull request. |
 | 8 | After deploying a semantic model to Production via pipeline, users see no data. | Deployment pipelines copy **metadata only**. A **data refresh** must be triggered in Production. |
@@ -317,6 +324,10 @@ flowchart TD
 | 13 | The organization wants all Fabric items to be classified before saving. | Enable **mandatory sensitivity labeling** in the Fabric tenant settings. |
 | 14 | A team distributes a standardized report layout without data so that each region can connect to its own source. | Distribute a **.pbit template file** with parameters for the data source. |
 | 15 | An external tool cannot connect to a semantic model via XMLA. | Verify that **XMLA read (or read/write) is enabled** at the tenant or capacity level and that the user has at least **Read and Build permission**. |
+| 16 | The customer master table in a lakehouse must be flagged as the organization's single source of truth. | Apply the **Master data** endorsement (requires admin authorization + write permission). |
+| 17 | Viewers of a lakehouse must only read the `Tables/Sales` folder and only rows for their region. | Create a **OneLake security role** scoped to that table with a row-level rule; assign the Viewers to it. |
+| 18 | After deploying a Direct Lake semantic model from Dev to Test, Test reports still show Dev data. | Direct Lake models **don't auto-bind** across stages — add a **data source deployment rule** pointing to the Test lakehouse. |
+| 19 | What is the minimum access needed to deploy content from Dev to Test? | **Pipeline admin** plus **Contributor** on both the Dev and Test workspaces (assigning a workspace to a stage needs workspace Admin). |
 
 ---
 

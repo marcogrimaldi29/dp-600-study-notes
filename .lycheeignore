@@ -1,0 +1,16 @@
+# Links lychee should skip (one regex per line). Used by .github/workflows/link-check.yml.
+
+# This site's own pages: relative and root-relative links resolve here via --base-url.
+# The Pages build publishes them, so the link check only covers external URLs.
+^https://marcogrimaldi29\.com/dp-600-study-notes/
+
+# Placeholder URLs inside code samples
+^https://\.\.\.
+^https://onelake\.\.\.
+
+# Badge images and the analytics script
+^https://img\.shields\.io/
+^https://cloud\.umami\.is/
+
+# LinkedIn answers automated requests with HTTP 999
+^https://(www\.)?linkedin\.com/

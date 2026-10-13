@@ -28,23 +28,26 @@ Domain 3 accounts for **25–30 %** of the DP-600 exam. It spans semantic-model 
 
 ### 💾 Choose a Storage Mode
 
-Power BI semantic models support three storage modes. The right choice depends on data volume, latency requirements, and whether Microsoft Fabric is in play.
+Power BI semantic model tables use one of three main storage modes — **Import**, **DirectQuery**, or **Direct Lake** — plus **Dual** for tables in composite models. The right choice depends on data volume, latency requirements, and whether Microsoft Fabric is in play.
 
 | Aspect | Import | DirectQuery | Direct Lake |
 |---|---|---|---|
 | **Data location** | Compressed in-memory (VertiPaq) | Stays in source; queries sent live | Delta tables in OneLake, loaded on demand |
 | **Performance** | Fastest queries | Slower — depends on source | Near-Import speed, no copy |
-| **Data freshness** | Stale until refresh | Real-time | Near-real-time (framing) |
+| **Data freshness** | Stale until refresh | Real-time | Near-real-time (framing / automatic updates) |
 | **Model size limit** | SKU RAM / Premium capacity | No hard limit | SKU guardrails apply |
 | **Transformation layer** | Power Query (M) in dataset | Limited PQ; views in source | Notebooks / Dataflows → Lakehouse |
+| **Licensing** | Any (Pro, PPU, capacity) | Any | **Fabric capacity only** |
 | **Best for** | Small–mid datasets needing speed | Real-time on relational sources | Fabric-native analytics at scale |
+
+**Dual** tables behave as Import *or* DirectQuery depending on the query — typically used for dimension tables shared by Import and DirectQuery fact tables in a composite model, so filters don't force a limited relationship.
 
 ```mermaid
 flowchart TD
     A[Start: Choose Storage Mode] --> B{Data in OneLake<br/>Delta tables?}
-    B -- Yes --> C{Need real-time<br/>to the second?}
-    C -- No --> D[Direct Lake]
-    C -- Yes --> E[Direct Lake +<br/>DirectQuery fallback]
+    B -- Yes --> C{Need every query to<br/>see the latest row?}
+    C -- No --> D[Direct Lake<br/>on OneLake]
+    C -- Yes --> E[DirectQuery<br/>to the SQL endpoint / Eventhouse]
     B -- No --> F{Data volume<br/>> capacity RAM?}
     F -- Yes --> G[DirectQuery]
     F -- No --> H{Need real-time?}
@@ -52,9 +55,9 @@ flowchart TD
     H -- No --> I[Import]
 ```
 
-> 🎯 **Exam Tip:** Direct Lake is the preferred mode for Fabric workloads. It reads Parquet files directly from OneLake — no data copy, no scheduled refresh in the Import sense. Know that it **requires Delta tables in a Lakehouse or Warehouse**.
+> 🎯 **Exam Tip:** Direct Lake is the preferred mode for Fabric workloads, and **Direct Lake on OneLake** is Microsoft's recommended option for new models. It reads Parquet files directly from OneLake — no data copy, no scheduled refresh in the Import sense. Know that it **requires Delta tables in OneLake** (Lakehouse, Warehouse, SQL database, mirrored database, or shortcuts that resolve to Delta).
 
-> ⚠️ **Exam Caveat:** Direct Lake is **only** available in Microsoft Fabric capacities (F SKUs) and Power BI Premium (P SKUs). It is not available in Pro-only workspaces or shared capacity.
+> ⚠️ **Exam Caveat:** Direct Lake requires a **Fabric capacity** (F SKU, or a legacy P SKU while those remain). It is not available in Pro or Premium Per User (PPU) workspaces.
 
 ---
 
@@ -251,7 +254,7 @@ CALCULATE(
 
 #### Calculation Groups
 
-Calculation groups let you define **reusable DAX transformations** that apply to any measure at evaluation time. They are created through Tabular Editor or XMLA endpoints.
+Calculation groups let you define **reusable DAX transformations** that apply to any measure at evaluation time. Create them in **Power BI Desktop** (Model view → **Calculation group** ribbon button, or a **TMDL view** script), when editing a model in the **web**, or with external tools like Tabular Editor. Creating one turns on **Discourage implicit measures** — calculation items only apply to explicit measures.
 
 Example — a Time Intelligence calculation group:
 
@@ -282,13 +285,14 @@ RETURN
 | Calculation Groups | Individual Measures |
 |---|---|
 | One definition applies to **all** measures | Each measure needs its own YTD, PY, YoY copy |
-| Maintained centrally via Tabular Editor / XMLA | Maintained individually in Power BI Desktop |
-| Can include **dynamic format strings** | Format strings are per-measure |
+| Maintained centrally (Desktop Model/TMDL view, web, or Tabular Editor) | Maintained individually per measure |
+| Each calculation item can have a **dynamic format string** | Each measure can also have its **own** dynamic format string |
 | Reduces measure proliferation | Can explode to hundreds of measures |
+| All measures switch to the **variant** data type once a calc group exists | Measures keep their own data types |
 
 #### Dynamic Format Strings
 
-Attached to a calculation item, a format string expression changes the display format contextually:
+A dynamic format string is a DAX expression that returns the format to apply. It can be attached to a **calculation item** *or* directly to a **measure** (in Desktop, set the measure's format to **Dynamic**) — so you no longer need a calculation group just to vary a measure's format:
 
 ```dax
 -- Format string for YoY % item
@@ -303,27 +307,27 @@ IF(
 
 Field parameters allow **report consumers** to swap dimensions or measures on a visual dynamically. Created in Power BI Desktop via the modelling ribbon, they generate a disconnected table with a DAX expression listing the fields.
 
-> 🎯 **Exam Tip:** Calculation groups require the model to be at **compatibility level 1500+** and are created outside Power BI Desktop (Tabular Editor, XMLA). Field parameters, by contrast, are created directly in Desktop.
+> 🎯 **Exam Tip:** Calculation groups require **compatibility level 1500+** and **explicit measures** (implicit measures are discouraged once a calc group exists). They're now created **directly in Power BI Desktop** (Model view or TMDL view) or web modeling, as well as in Tabular Editor. Field parameters are also created in Desktop (Modeling → New parameter → Fields). Answers claiming calc groups *require* Tabular Editor are outdated.
 
 ---
 
 ### 📦 Large Semantic Model Storage Format
 
-When enabled, the semantic model can exceed the default per-dataset size limit by storing segments on Premium capacity storage rather than solely in memory.
+When enabled, the semantic model is stored in Premium Files storage, so it can grow **beyond 10 GB** — up to the capacity's max memory (e.g., **25 GB on F64**) or the limit the capacity admin sets. It also uses 8-million-row segments and supports on-demand loading of evicted models.
 
 **When to enable:**
 
-- Models approaching or exceeding the default size limit (e.g., > 10 GB on P1/F64)
-- Incremental refresh with many partitions
-- Need XMLA read/write endpoint access for third-party tooling
+- Models that will grow **beyond 10 GB** (the Desktop upload limit stays 10 GB — the model grows in the service through refresh, typically with incremental refresh)
+- Models you plan to **write to through the XMLA endpoint** (Tabular Editor, SSMS, ALM Toolkit) — large format improves XMLA write performance, so Microsoft recommends it even for small models
+- Prerequisite for **query scale-out** and **semantic model version history**
 
 **Implications:**
 
-- Requires **Premium Per User**, Premium capacity (P SKU), or Fabric capacity (F SKU)
-- Once enabled, the model can be managed through the **XMLA endpoint** (Tabular Editor, SSMS, ALM Toolkit)
-- Enables features such as object-level security, calculation groups via XMLA, and metadata-only deployments
+- Available on **Fabric (F)**, Premium (P), Embedded (A) capacities and **PPU**
+- Can be set as the **default storage format** for new models in a workspace's Premium settings; models are also converted automatically when you first edit them in the web or live-edit a Direct Lake model in Desktop
+- Only available in Azure regions that support Premium Files; a workspace with a large model can't move to a capacity in another region
 
-> ⚠️ **Exam Caveat:** Enabling large model storage format is a **one-way setting** — once turned on it cannot be reverted to small format without recreating the dataset.
+> ⚠️ **Exam Caveat:** Large format is **not** a prerequisite for XMLA, OLS, or calculation groups — those work without it. And it **can** be switched off again (the model must fit the small-format limits), but doing so **deletes the model's version history**.
 
 ---
 
@@ -348,11 +352,11 @@ flowchart LR
 1. **Import + DirectQuery** — classic composite model; aggregation tables in Import accelerate DQ queries.
 2. **Direct Lake on OneLake + Import** — the modern Fabric composite: keep very large facts in Direct Lake, add smaller dimensions or analyst-owned tables in **Import** (with Power Query) — supported in **Power BI web modeling and Desktop live edit**. DirectQuery/Dual tables can be added with XMLA tools.
 3. **Direct Lake + DirectQuery** — core facts from a Lakehouse, supplemental data from external SQL.
-4. **Relationships across storage modes** form a *limited relationship* (DirectQuery semantics apply to that join).
+4. **Relationships across storage modes** — in a classic **Import + DirectQuery** composite (or across source groups), they form a *limited relationship* evaluated with DirectQuery semantics. **Direct Lake on OneLake + Import** composites are different: they support **regular relationships**, so report performance stays Import-like.
 
 > ⚠️ **Exam Caveat:** Composite modelling that mixes Direct Lake with Import/DirectQuery in one model is a **Direct Lake on OneLake** capability. A **Direct Lake on SQL** model **cannot** contain other storage-mode tables directly — you must first build a composite *on top of it* in Power BI Desktop, which creates a new model that extends it with Import/DQ tables. (Older notes saying "Direct Lake can't mix with Import at all" are out of date.)
 
-> 🎯 **Exam Tip:** In a composite model, any relationship that crosses storage-mode boundaries is evaluated using **DirectQuery semantics**, even if one side is Import. This can affect performance — the exam tests awareness of this.
+> 🎯 **Exam Tip:** In a classic composite model (Import + DirectQuery), a relationship that crosses source groups is a **limited relationship** evaluated with DirectQuery semantics, even if one side is Import — set shared dimensions to **Dual** to avoid this. The exception to remember: **Direct Lake on OneLake + Import** tables use **regular** relationships.
 
 ---
 
@@ -364,9 +368,9 @@ flowchart LR
 |---|---|
 | **Reduce visual count** | Aim for ≤ 8 visuals per page; each visual fires a separate query |
 | **Avoid high-cardinality columns in visuals** | Showing millions of distinct values forces large result sets |
-| **Use aggregation tables** | Pre-aggregated Import tables sit in front of DirectQuery detail tables |
-| **Set report page type to Tooltip or Drillthrough** | Reduces default-load query count |
-| **Use Performance Analyzer** | Capture DAX queries generated by each visual; identify slow ones |
+| **Use aggregation tables** | Pre-aggregated Import tables sit in front of DirectQuery detail tables (not supported on Direct Lake tables) |
+| **Move detail to drillthrough / tooltip pages** | Detail visuals only query when the user asks for them, not on every page load |
+| **Use Performance Analyzer** | Capture DAX queries generated by each visual; identify slow ones and open them in **DAX query view** |
 
 ---
 
@@ -397,7 +401,7 @@ CALCULATE(
 )
 ```
 
-> 🎯 **Exam Tip:** The Performance Analyzer in Power BI Desktop shows three timings for each visual: **DAX query**, **visual rendering**, and **other**. For DAX tuning, copy the DAX query and test it in DAX Studio or the Fabric portal query view.
+> 🎯 **Exam Tip:** The Performance Analyzer in Power BI Desktop shows three timings for each visual: **DAX query**, **visual rendering**, and **other**. For DAX tuning, copy the DAX query and test it in **DAX query view** (Desktop or web) or DAX Studio.
 
 ---
 
@@ -417,13 +421,13 @@ flowchart LR
 - **Framing** is the process by which the Direct Lake model takes a snapshot (a "frame") of the current Delta table version — it records which Parquet files and row groups back each table. Data itself is **not** copied; only the pointers to the latest committed Delta files are updated. Queries then page column data into memory on demand (**transcoding**) the first time a column is touched.
 - A Direct Lake **refresh is just reframing** — a low-cost metadata operation that takes seconds, not a full data copy. This is the key contrast with Import mode, where refresh replicates the entire dataset.
 - **Automatic updates (auto-reframe)** — when enabled (default), the model reframes automatically after the source Delta tables change, so new data appears without a schedule. You can disable it and reframe **programmatically** (XMLA / Fabric API / pipeline) when you need controlled, transactionally consistent updates. Manual/scheduled refresh in the model still just triggers reframing.
-- **V-Order** is a write-time optimisation applied to Parquet files that aligns data for fast VertiPaq reads. Keep V-Order enabled and periodically run `OPTIMIZE` on Delta tables — poorly compacted tables (many small files / row groups) hurt Direct Lake performance and can push a table over its guardrails.
+- **V-Order** is a write-time optimisation applied to Parquet files that aligns data for fast VertiPaq reads. V-Order is **off by default in new workspaces** (`writeHeavy` resource profile), so enable it — or use the `readHeavyForPBI` profile — for tables that back Direct Lake models, and periodically run `OPTIMIZE` on Delta tables — poorly compacted tables (many small files / row groups) hurt Direct Lake performance and can push a table over its guardrails.
 
 > 🎯 **Exam Tip:** "Configure Direct Lake, including default fallback and **refresh** behavior" is an explicit exam objective. Remember: a Direct Lake refresh = **framing** (metadata only), and *automatic updates* keep the model current without a scheduled refresh. Reframing on demand is done via the XMLA endpoint or the Fabric refresh API.
 
 #### The Two Flavours: Direct Lake on OneLake vs Direct Lake on SQL
 
-This is the skill the July 2026 update added — *"Choose between Direct Lake on OneLake and Direct Lake on SQL analytics endpoint."* Both load Delta data from OneLake into VertiPaq; they differ in **how the model discovers schema, enforces security, and what happens when a table can't be served in-memory**.
+This objective was added in the July 2026 skills revision and is still current as of the October 19, 2026 revision — *"Choose between Direct Lake on OneLake and Direct Lake on SQL analytics endpoint."* Microsoft now recommends **Direct Lake on OneLake** for new semantic models. Both load Delta data from OneLake into VertiPaq; they differ in **how the model discovers schema, enforces security, and what happens when a table can't be served in-memory**.
 
 | Aspect | **Direct Lake on OneLake** | **Direct Lake on SQL** (analytics endpoint) |
 |---|---|---|
@@ -432,10 +436,10 @@ This is the skill the July 2026 update added — *"Choose between Direct Lake on
 | **Data sources per model** | **Multiple** Fabric items — tables from several lakehouses / warehouses across workspaces in **one** model | **Single** Fabric item — tables (or views) from one lakehouse or warehouse only |
 | **Composite models** | **Supported** — combine Direct Lake tables with **Import** tables (web modeling) and **DirectQuery/Dual** tables (XMLA tools) | **Not supported** in the same model. You can still build a composite *on top of* it in Power BI Desktop, which extends it with new Import/DQ tables |
 | **Security enforcement** | OneLake security via **OneLake APIs**. SQL-endpoint RLS/CLS/OLS is **not** applied (user needs file access in OneLake). Semantic-model RLS/OLS still works | Honours **SQL analytics endpoint** RLS/CLS/OLS (delegated identity). SQL RLS causes fallback to DirectQuery |
-| **SQL views** | Not supported as a Direct Lake table (use a materialized view, or add the view as an Import/DQ table) | Supported, **but queries fall back to DirectQuery** |
-| **Calculated columns / tables** | Calculated tables and columns referencing Direct Lake tables supported (**preview**) | Not supported (except calc groups, what-if & field parameters) |
+| **SQL views** | Not supported as a Direct Lake table (use a **materialized lake view**, which is a Delta table, or add the view as an Import/DQ table) | Supported, **but queries fall back to DirectQuery** |
+| **Calculated columns / tables** | Calculated tables referencing Direct Lake tables supported (**preview**); calculated columns supported for **user-context** expressions only (**preview**) | Not supported (except calc groups, what-if & field parameters) |
 | **Where you create it** | Power BI Desktop, Power BI service (**OneLake catalog → New semantic model**), or the SQL endpoint page | **Only** from the SQL analytics endpoint page (**New semantic model**); editable in Desktop afterwards |
-| **Guardrail exceeded** | Behaves like Import — **refresh fails**, model can't be queried until Delta tables are optimised | Refresh **succeeds with a warning**; queries **fall back to DirectQuery** (slower) if fallback enabled |
+| **Guardrail exceeded** | Behaves like Import — **refresh fails**, model can't be queried until Delta tables are optimised | Refresh **succeeds with a warning**; queries **fall back to DirectQuery** (slower) if fallback enabled. One over-guardrail table prevents Direct Lake for the **whole model** |
 
 **Choose Direct Lake on OneLake when** you want the best/most consistent performance, tables from **more than one** Fabric source, **composite** models with Import/DirectQuery, OneLake security, calculated columns/tables, or guaranteed no silent DirectQuery fallback (`DirectLakeOnly`).
 
@@ -470,7 +474,7 @@ Incremental refresh partitions a table by date so that only recent data is refre
 1. Create `RangeStart` and `RangeEnd` parameters (type DateTime) in Power Query.
 2. Filter the source table to rows between these parameters.
 3. Define the refresh policy: archive period (e.g., 3 years), incremental period (e.g., 30 days).
-4. Optionally enable **real-time data with DirectQuery** — this adds a DirectQuery partition for the latest data that is always live.
+4. Optionally enable **real-time data with DirectQuery** — this adds a DirectQuery partition for the latest data that is always live (a *hybrid table*; requires a Premium/Fabric capacity or PPU).
 
 | Configuration | Effect |
 |---|---|
@@ -481,7 +485,7 @@ Incremental refresh partitions a table by date so that only recent data is refre
 
 > ⚠️ **Exam Caveat:** The `RangeStart` and `RangeEnd` parameters **must** be of type DateTime and **must** be named exactly `RangeStart` and `RangeEnd` (case-sensitive). This is a frequent exam trick.
 
-> 🎯 **Exam Tip:** Incremental refresh combined with the **large model storage format** is required when the number of partitions grows large. Without large format, you may hit partition-count limits.
+> 🎯 **Exam Tip:** Incremental refresh itself works with **Pro**, but hybrid tables (the real-time DirectQuery partition) need Premium/Fabric or PPU. Pair it with **large semantic model storage format** when the model will grow past 10 GB in the service, and use the XMLA endpoint to refresh or manage individual partitions. Incremental refresh applies to **Import** tables — Direct Lake tables have no model partitions (partition the Delta table instead).
 
 ---
 
@@ -494,16 +498,16 @@ Incremental refresh partitions a table by date so that only recent data is refre
 | 3 | Need both Lakehouse facts and live Azure SQL budget data in one model | **Composite model** — Direct Lake + DirectQuery |
 | 4 | Date dimension plays Order Date and Ship Date roles | One active relationship; use **USERELATIONSHIP** in measures for the inactive one |
 | 5 | Hundreds of measures each need YTD, PY, and YoY variants | Create a **calculation group** with three calculation items |
-| 6 | Report visual shows "query exceeded guardrails" error | Direct Lake fallback is **disabled**; either enable fallback or reduce data/columns below SKU limits |
-| 7 | Model size approaching 10 GB on P1 / F64 | Enable **large semantic model storage format** |
+| 6 | Report visual shows "query exceeded guardrails" error | The model can't fall back (**Direct Lake on OneLake**, or `DirectLakeOnly`): run `OPTIMIZE` to cut Parquet files/row groups, or scale up the SKU — or, on **Direct Lake on SQL**, allow fallback |
+| 7 | Import model must grow beyond 10 GB on F64 | Enable **large semantic model storage format** (max then = capacity memory, 25 GB on F64) |
 | 8 | Need to refresh only the last 7 days of a 5-year sales table | Configure **incremental refresh** with 5-year archive, 7-day incremental window |
 | 9 | DAX measure runs slowly — wraps entire Sales table in FILTER | Replace `FILTER( Sales, ... )` with a **column predicate** inside `CALCULATE` |
 | 10 | Report users want to switch between Revenue, Cost, and Profit on one visual | Implement a **field parameter** |
 | 11 | Bridge table connects patients to multiple diagnoses | **Many-to-many** relationship through bridge; consider bi-directional filter or DAX with CROSSFILTER |
 | 12 | You want Prior Year to show as a percentage format but Current Year as currency | Use **dynamic format strings** on the calculation group items |
-| 13 | Need third-party tool (Tabular Editor) to deploy model metadata | Enable **XMLA read/write endpoint** (requires Premium / Fabric capacity) |
+| 13 | Need third-party tool (Tabular Editor) to deploy model metadata | Set the capacity's **XMLA endpoint to Read Write** (default is Read Only; any F SKU, P SKU, or PPU) — and enable large format for better XMLA write performance |
 | 14 | Direct Lake model must guarantee no silent performance degradation | Set `DirectLakeBehavior = DirectLakeOnly` (or use **Direct Lake on OneLake**, which never falls back) — over-guardrail queries error instead of going to DQ |
-| 15 | Incremental refresh partitions keep growing and model won't publish | Enable **large model storage format** to support higher partition counts |
+| 15 | A 6 GB .pbix publishes fine, but once incremental refresh loads full history the model needs ~40 GB on F128 | Enable **large semantic model storage format** — the Desktop upload stays capped at 10 GB, but the model can grow in the service |
 | 16 | One semantic model must combine fact tables from **two different lakehouses** plus a warehouse | **Direct Lake on OneLake** — only it can source tables from multiple Fabric items in one model |
 | 17 | Reports must honour **RLS/CLS defined on the Warehouse SQL analytics endpoint** | **Direct Lake on SQL** (delegated identity) — it enforces SQL-endpoint security; OneLake flavour does not apply SQL RLS |
 | 18 | Large Direct Lake facts plus a small analyst-built dimension using Power Query, in one model | **Direct Lake on OneLake + Import** composite model |

@@ -31,7 +31,7 @@ personal_site_label: "marcogrimaldi29.com"
 gh_edit_link:         false
 gh_edit_link_text:    "Edit this page on GitHub ✏️"
 gh_edit_repository:   "https://github.com/marcogrimaldi29/dp-600-study-notes"
-gh_edit_branch:       "main"
+gh_edit_branch:       "master"
 gh_edit_view_mode:    "edit"
 
 # ── Just the Docs theme settings ──────────────────────────
@@ -52,6 +52,8 @@ search:
 # Navigation
 nav_sort: order
 nav_external_links:
+  - title: "📘 Study Notes Hub"
+    url: https://marcogrimaldi29.com/study-notes/
   - title: "📘 AZ-305 Study Notes"
     url: https://marcogrimaldi29.com/az-305-study-notes/
   - title: "🥽 AZ-305: Data & Analytics Services — Deep Dive"

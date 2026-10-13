@@ -13,7 +13,7 @@ mermaid: true
 > - Based on: *Microsoft Fabric documentation* (Microsoft Learn)
 > - 📁 [← Back to Home](/dp-600-study-notes/)
 
-Domain 2 is the heaviest weighted on the DP-600 exam, covering **45–50%** of the questions. This domain tests your ability to connect to data sources, discover data using OneLake catalog, choose appropriate data stores (lakehouse, warehouse, eventhouse), and perform data transformations using SQL, KQL, and DAX.
+Domain 2 is the heaviest weighted on the DP-600 exam, covering **45–50%** of the questions. This domain tests your ability to connect to data sources, discover data using OneLake catalog, choose appropriate data stores (lakehouse, warehouse, eventhouse, SQL database), and perform data transformations using SQL, KQL, and DAX.
 
 <details open markdown="block">
   <summary>Table of contents</summary>
@@ -47,7 +47,7 @@ mindmap
       Type Conversion
       Filtering
     2.3 Query & Analyze
-      Visual Query Editor
+      Visual query editor
       T-SQL Queries
       KQL Queries
       DAX Queries
@@ -89,7 +89,7 @@ flowchart TD
 
 ### 🔎 Discover Data by Using OneLake Catalog and Real-Time Hub
 
-**OneLake catalog** (formerly OneLake data hub) is the centralized discovery experience where users browse, search, and access endorsed data items across the Fabric tenant.
+**OneLake catalog** (formerly OneLake data hub) is the centralized discovery experience where users browse, search, and access the Fabric items they have permission to see across the tenant. Its **Explore** tab is for finding and using data; its **Govern** tab is where data owners review and govern the items they own.
 
 | Feature | OneLake Catalog | Real-Time Hub |
 |---------|----------------|---------------|
@@ -98,7 +98,7 @@ flowchart TD
 | **Sources** | Fabric items across workspaces | Event Hubs, Eventstreams, CDC streams, custom apps |
 | **Action** | Open, connect, or create shortcuts | Subscribe, route to Eventhouse or Lakehouse |
 
-> **Exam Tip:** OneLake catalog shows items that have been **endorsed** (Promoted or Certified). Know the difference: **Promoted** = self-service endorsement by the item owner; **Certified** = organization-level endorsement requiring admin-defined permissions.
+> **Exam Tip:** OneLake catalog lists **every item you can access** — endorsed items are badged and can be filtered so trusted data is easy to find. Know the three badges: **Promoted** = self-service, anyone with write permission; **Certified** = meets org quality standards, admin-authorized reviewers only; **Master data** = authoritative single source of truth (data items only), admin-authorized users only.
 {: .note }
 
 ---
@@ -108,9 +108,11 @@ flowchart TD
 ```mermaid
 flowchart TD
     START([Choose Ingestion Method]) --> Q1{Need to\ncopy data?}
-    Q1 -->|"Yes — move data\ninto OneLake"| COPY{Volume &\ncomplexity?}
     Q1 -->|"No — access\nin-place"| SHORTCUT["OneLake Shortcut\n(virtual pointer)"]
-    COPY -->|"Large scale,\nscheduled batch"| PIPELINE["Pipeline\nCopy Activity"]
+    Q1 -->|"Yes — move data\ninto OneLake"| COPY{What kind of\nmovement?}
+    COPY -->|"Replicate an operational DB\nas-is, near real-time"| MIRROR["Mirroring\n(free, CDC, read-only replica)"]
+    COPY -->|"Bulk / incremental / CDC copy\nwithout building a pipeline"| COPYJOB["Copy job"]
+    COPY -->|"Orchestrated, parameterized\nmulti-step workflow"| PIPELINE["Pipeline\nCopy activity"]
     COPY -->|"No-code visual\ntransforms"| DFGEN2["Dataflow Gen2\n(Power Query Online)"]
     COPY -->|"Complex logic,\nlarge data"| NOTEBOOK["Spark Notebook\n(PySpark / SQL)"]
     COPY -->|"Real-time\nstreaming"| EVENTSTREAM["Eventstream\n(to Eventhouse / Lakehouse)"]
@@ -120,16 +122,21 @@ flowchart TD
 
 | Method | Code Required | Best For | Scheduling | Transform Capability |
 |--------|:------------:|----------|:----------:|---------------------|
-| **Copy Activity (Pipeline)** | ❌ | Bulk ETL, 90+ source connectors | ✅ (triggers, schedule) | Minimal (column mapping) |
-| **Dataflow Gen2** | ❌ (M / Power Query) | Self-service, moderate transforms | ✅ (pipeline orchestration) | Rich (300+ transforms) |
+| **Mirroring** | ❌ | Continuous replica of a database (Azure SQL, Cosmos DB, Snowflake, …) for analytics | Continuous (CDC) | None — read-only Delta replica with a SQL analytics endpoint; **free** replication |
+| **Copy job** | ❌ | Bulk, watermark-based incremental, or CDC copy across many sources/destinations — no pipeline needed | ✅ (built-in schedule) | Low (mapping, append/upsert/overwrite) |
+| **Copy activity (Pipeline)** | ❌ | Orchestrated, metadata-driven ingestion with dependencies and error handling | ✅ (triggers, schedule) | Low (column mapping, user-defined source query) |
+| **Dataflow Gen2** | ❌ (M / Power Query) | Self-service, moderate transforms | ✅ (own schedule or pipeline) | Rich (Power Query) |
 | **Spark Notebook** | ✅ (PySpark, Spark SQL) | Complex transforms, ML, large data | ✅ (pipeline, schedule) | Full programmatic control |
-| **Shortcut** | ❌ | Zero-copy access to ADLS, S3, GCS, other lakehouses | N/A (live pointer) | None (query at read time) |
-| **Eventstream** | ❌ | Real-time ingestion from Event Hubs, Kafka | Continuous | Inline transforms |
+| **Shortcut** | ❌ | Zero-copy access to ADLS, S3, GCS, Dataverse, other lakehouses | N/A (live pointer) | None (query at read time) |
+| **Eventstream** | ❌ | Real-time ingestion from Event Hubs, Kafka, CDC feeds | Continuous | Inline (no-code) stream transforms |
+
+> **Exam Tip:** Microsoft's own decision guide: **Mirroring** for "just get the (already curated) operational data into Fabric" (free, minimal setup); **Copy job** as the default for raw/bronze ingestion that needs incremental or CDC loads; **pipelines with Copy activity** when you need orchestration; **Eventstreams** for streaming.
+{: .note }
 
 > **Exam Caveat:** Shortcuts do NOT copy data — they create a virtual pointer. This means shortcut data is NOT included in lakehouse OPTIMIZE or VACUUM operations. For exam questions about reducing data duplication, shortcuts are the answer.
 {: .warning }
 
-> **Exam Caveat:** Dataflow Gen2 outputs can land in a **lakehouse, warehouse, or KQL database**. Dataflow Gen1 (legacy) only targets Power BI datasets. The exam tests Gen2 specifically.
+> **Exam Caveat:** **Dataflow Gen2** can write to many destinations — Lakehouse tables or files, Warehouse, KQL database, Fabric SQL database, Azure SQL, Azure Data Explorer, ADLS Gen2, SharePoint files, Snowflake, and more. **Dataflow Gen1** (legacy) keeps its output in its own internal storage, consumed through the dataflows connector. The exam tests Gen2.
 {: .warning }
 
 ---
@@ -144,22 +151,27 @@ flowchart TD
     Q1 -->|"T-SQL read/write\nstored procs, views"| WH["Warehouse"]
     Q1 -->|"Spark + T-SQL\nmulti-engine flexibility"| LH["Lakehouse"]
     Q1 -->|"KQL\nreal-time, time-series"| EH["Eventhouse\n(KQL Database)"]
+    Q1 -->|"OLTP — frequent\nrow-level updates"| SQLDB["SQL database\nin Fabric"]
     LH --> NOTE1["SQL Analytics Endpoint\nprovides read-only T-SQL"]
     WH --> NOTE2["Full T-SQL DML + DDL\n(INSERT, UPDATE, DELETE)"]
     EH --> NOTE3["Optimized for append-heavy\nlog / IoT / telemetry data"]
+    SQLDB --> NOTE4["Transactional engine,\nauto-replicated to OneLake"]
 ```
 
 #### Data Store Selection Matrix
 
-| Criterion | Lakehouse | Warehouse | Eventhouse (KQL DB) |
-|-----------|:---------:|:---------:|:-------------------:|
-| **Engine** | Spark + SQL Analytics Endpoint | Full T-SQL | KQL |
-| **Write via T-SQL** | ❌ (read-only endpoint) | ✅ (INSERT, UPDATE, DELETE) | ❌ |
-| **Write via Spark** | ✅ | ❌ | ❌ |
-| **File format** | Delta (Parquet) in OneLake | Delta (Parquet) in OneLake (T-SQL–managed) | Columnar (KQL engine) |
-| **Schema enforcement** | Schema-on-read or schema-on-write | Schema-on-write (strict) | Schema-on-write |
-| **Unstructured files** | ✅ (Files/ folder) | ❌ | ❌ |
-| **Best for** | Data engineering, ML, flexible ETL | Enterprise DW, SQL-heavy BI | Real-time analytics, logs, IoT |
+| Criterion | Lakehouse | Warehouse | Eventhouse (KQL DB) | SQL database |
+|-----------|:---------:|:---------:|:-------------------:|:------------:|
+| **Engine** | Spark + SQL Analytics Endpoint | Full T-SQL | KQL (plus a T-SQL subset) | T-SQL (Azure SQL engine) |
+| **Write via T-SQL** | ❌ (read-only endpoint) | ✅ (INSERT, UPDATE, DELETE, MERGE) | ❌ | ✅ |
+| **Write via Spark** | ✅ | ❌ | ❌ | ❌ |
+| **Storage / OneLake** | Delta (Parquet) in OneLake | Delta (Parquet) in OneLake (T-SQL–managed) | Columnar (KQL engine); Delta copy in OneLake is **opt-in** | Row store, **auto-mirrored** to Delta in OneLake |
+| **Schema enforcement** | Schema-on-read or schema-on-write | Schema-on-write (strict) | Schema-on-write | Schema-on-write, enforced constraints |
+| **Unstructured files** | ✅ (Files/ folder) | ❌ | ❌ | ❌ |
+| **Best for** | Data engineering, ML, flexible ETL | Enterprise DW, SQL-heavy BI, multi-table transactions | Real-time analytics, logs, IoT | Operational/OLTP apps, selective lookups |
+
+> **Exam Tip:** Microsoft's data-store decision guide in one line each: **Eventhouse** for streaming/event data, **SQL database** for OLTP, **Cosmos DB in Fabric** for NoSQL, **Warehouse** for enterprise SQL BI with full transactions, **Lakehouse** for big data, ML, and data engineering — and a **shortcut** when the data already exists elsewhere and you don't need a copy.
+{: .note }
 
 > **Exam Tip:** If the scenario says "T-SQL stored procedures are needed for data transformation," the answer is **Warehouse** — the Lakehouse SQL Analytics Endpoint is **read-only**.
 {: .note }
@@ -174,16 +186,26 @@ flowchart TD
 
 ### 🔗 Implement OneLake Integration for Eventhouse and Semantic Models
 
-**Eventhouse OneLake integration** allows KQL database data to be mirrored to OneLake in Delta format, making it queryable by Spark and SQL engines.
+Both integrations do the same thing in opposite corners of Fabric: they **write a Delta copy of an engine's internal data into OneLake** so every other engine (Spark, SQL, Direct Lake, shortcuts) can read it.
 
-**Semantic model OneLake integration** enables Direct Lake mode, where a semantic model reads Parquet/Delta files directly from OneLake without importing data into memory upfront.
+**Eventhouse OneLake availability** — turn on **OneLake availability** for a KQL **database or an individual table**. KQL data is then exposed in OneLake in Delta format (a logical copy at no extra storage cost), queryable via shortcuts from a lakehouse/warehouse, notebooks, a SQL analytics endpoint, and Direct Lake.
+
+- Enabling it at **database** level includes all **new** tables; tick **Apply to existing tables** to backfill existing ones. Table level exposes just that table.
+- Data is batched into well-sized Parquet files, so it can lag by **up to 3 hours** by default (tunable down to 5 minutes with the mirroring policy's `TargetLatencyInMinutes`).
+- While enabled you **can't** rename tables, alter column types, apply RLS to those tables, or delete/purge data — turn it off first.
+
+**Semantic model OneLake integration** — a setting on an **Import-mode** semantic model that **exports its imported tables to Delta tables in OneLake** every time the model refreshes. Data engineers and scientists can then reach the same data that drives Power BI through **shortcuts** (Spark, T-SQL, pipelines) without another copy.
+
+- Requires a **Fabric (F) or Premium (P) capacity** — not Pro or PPU. Turn it on in the model's settings (**OneLake integration → On**), then run at least one refresh.
+- Only **import** tables are exported — measures, DirectQuery tables, hybrid tables, calculation-group tables, and system aggregation tables are not.
+- Exported tables land under a `<model>.SemanticModel` folder in the workspace; old Delta versions are removed after 3 days.
 
 | Integration | Data Flow | Format in OneLake | Benefit |
 |-------------|-----------|-------------------|---------|
-| **Eventhouse to OneLake** | KQL DB tables mirrored to OneLake | Delta (Parquet) | Cross-engine queries (Spark, SQL) on real-time data |
-| **Semantic model (Direct Lake)** | Semantic model reads from OneLake | Delta (Parquet) | No import needed; near-real-time freshness |
+| **Eventhouse → OneLake** | KQL database/table → Delta copy in OneLake | Delta (Parquet) | Spark, SQL, and Direct Lake over real-time data |
+| **Semantic model → OneLake** | Import-mode tables → Delta tables on each refresh | Delta (Parquet) | Reuse Power BI-curated data in Spark / SQL via shortcuts |
 
-> **Exam Caveat:** OneLake availability for Eventhouse must be enabled at the **database level**. Not all KQL tables are mirrored by default — you configure which tables to expose.
+> **Exam Caveat:** Don't confuse **semantic model OneLake integration** (an *Import* model **exporting** data **to** OneLake) with **Direct Lake** (a model **reading** Delta tables **from** OneLake). If a scenario wants notebooks to consume the data already loaded into an Import model, the answer is OneLake integration + a shortcut.
 {: .warning }
 
 ---
@@ -192,14 +214,15 @@ flowchart TD
 
 ### 🧱 Create Views, Functions, and Stored Procedures
 
-These objects are available in the **Warehouse** and, for Views only, in the **SQL Analytics Endpoint** (Lakehouse).
+These objects are available in both the **Warehouse** and the **SQL Analytics Endpoint** (Lakehouse, mirrored database). The difference is what they can *do*: on the endpoint they can only **read** data.
 
 | Object | Warehouse | SQL Analytics Endpoint (Lakehouse) |
 |--------|:---------:|:---------------------------------:|
-| **Views** | ✅ (CREATE VIEW) | ✅ (auto-generated + custom) |
-| **Stored Procedures** | ✅ (CREATE PROCEDURE) | ❌ |
-| **Table-Valued Functions** | ✅ | ❌ |
-| **Scalar Functions** | ✅ | ❌ |
+| **Views** | ✅ (CREATE VIEW) | ✅ (CREATE VIEW) |
+| **Stored Procedures** | ✅ (can read **and** write) | ✅ (read-only logic — no INSERT/UPDATE/DELETE) |
+| **Inline Table-Valued Functions** | ✅ | ✅ |
+| **Scalar Functions** | ✅ (when inlineable) | ✅ (when inlineable) |
+| **Tables (CREATE TABLE / DML)** | ✅ | ❌ |
 
 ```sql
 -- Warehouse: Create a reusable view
@@ -222,7 +245,7 @@ BEGIN
 END;
 ```
 
-> **Exam Tip:** The Lakehouse SQL Analytics Endpoint auto-generates Views for each Delta table. You *CAN* create custom views on top of these, but you *CANNOT* create stored procedures or functions.
+> **Exam Tip:** The Lakehouse SQL Analytics Endpoint exposes each Delta table in `Tables/` as a read-only **table**. You *CAN* create views, functions, and stored procedures on top of them to encapsulate logic, but you *CANNOT* create tables or modify data — a stored procedure that needs to INSERT/UPDATE belongs in a **Warehouse**. Multi-statement table-valued functions aren't supported on either surface.
 {: .note }
 
 ---
@@ -233,11 +256,15 @@ Enrichment adds calculated or derived information to existing datasets.
 
 | Technique | Tool | Example |
 |-----------|------|---------|
-| **Computed column** | SQL (Warehouse) | `ALTER TABLE ... ADD FullName AS FirstName + ' ' + LastName` |
+| **Derived column in a view / CTAS** | SQL (Warehouse, SQL endpoint) | `SELECT *, FirstName + ' ' + LastName AS FullName FROM ...` |
+| **New nullable column** | SQL (Warehouse) | `ALTER TABLE ... ADD Segment VARCHAR(20) NULL;` then `UPDATE` |
 | **Derived column** | Dataflow Gen2 | Add Column > Custom Column in Power Query |
 | **withColumn** | PySpark (Notebook) | `df.withColumn("Margin", col("Revenue") - col("Cost"))` |
 | **Lookup / Merge** | Dataflow Gen2 | Merge with reference table to add descriptions |
 | **Reference table** | SQL (Warehouse) | JOIN with a dimension table to add category names |
+
+> **Exam Caveat:** Fabric Warehouse doesn't support **computed columns**, and `ALTER TABLE` can only **ADD nullable columns** or **DROP** columns (plus `NOT ENFORCED` key constraints). To "add a calculated column" to a Warehouse table, derive it in a **view** or rebuild the table with **CTAS**.
+{: .warning }
 
 ---
 
@@ -306,28 +333,28 @@ erDiagram
 ```sql
 -- Create a dimension table with surrogate key in Warehouse
 CREATE TABLE dbo.DimCustomer (
-    CustomerKey INT IDENTITY(1,1) NOT NULL,
-    CustomerID  NVARCHAR(20) NOT NULL,   -- natural / business key
-    FullName    NVARCHAR(100),
-    Email       NVARCHAR(200),
-    City        NVARCHAR(100),
-    Country     NVARCHAR(100),
-    IsActive    BIT DEFAULT 1
+    CustomerKey BIGINT IDENTITY,          -- surrogate key: BIGINT only, no seed/increment
+    CustomerID  VARCHAR(20) NOT NULL,     -- natural / business key
+    FullName    VARCHAR(100),
+    Email       VARCHAR(200),
+    City        VARCHAR(100),
+    Country     VARCHAR(100),
+    IsActive    BIT NOT NULL              -- no DEFAULT constraints in Fabric Warehouse
 );
 
 -- Create a fact table referencing dimensions
 CREATE TABLE dbo.FactSales (
     DateKey      INT NOT NULL,
-    CustomerKey  INT NOT NULL,
-    ProductKey   INT NOT NULL,
-    StoreKey     INT NOT NULL,
+    CustomerKey  BIGINT NOT NULL,
+    ProductKey   BIGINT NOT NULL,
+    StoreKey     BIGINT NOT NULL,
     Amount       DECIMAL(18,2),
     Quantity     INT,
     Discount     DECIMAL(5,2)
 );
 ```
 
-> **Exam Caveat:** Fabric Warehouse supports `IDENTITY` columns for surrogate keys, but the Lakehouse (Delta tables via Spark) does NOT. In Lakehouses, use `monotonically_increasing_id()` in PySpark or a manual key generation approach.
+> **Exam Caveat:** Fabric Warehouse `IDENTITY` columns must be **`BIGINT IDENTITY`** — you **can't** specify a seed or increment, and values are **unique but not sequential** (gaps are normal). Warehouse tables also don't support `DEFAULT` constraints, computed columns, or `NVARCHAR`/`DATETIME`/`MONEY`/`TINYINT` (use `VARCHAR`, `DATETIME2`, `DECIMAL`, `SMALLINT`). In a **Lakehouse**, Delta identity columns exist only on Spark runtime 2.0+ via the `DeltaTableBuilder` API; otherwise generate keys with `row_number()` over a window (consecutive) or `monotonically_increasing_id()` (unique, not consecutive).
 {: .warning }
 
 > **Exam Tip:** The exam tests why surrogate keys are preferred over natural keys: (1) they are stable even when business keys change, (2) they are integers which join faster, (3) they handle unknown/missing dimension members (e.g., key = -1).
@@ -359,26 +386,26 @@ Pre-aggregation reduces data volume and speeds up queries for dashboards and rep
 | Technique | Where | Example |
 |-----------|-------|---------|
 | **Aggregation table** | Lakehouse / Warehouse | `CREATE TABLE agg_MonthlySales AS SELECT ...` |
-| **Materialized view** | Warehouse (preview) | Pre-computed query results, auto-refreshed |
+| **Materialized lake view** | Lakehouse (Spark SQL) | `CREATE MATERIALIZED LAKE VIEW gold.monthly_sales AS SELECT ...` — persisted as Delta, refreshed by Fabric |
 | **GROUP BY query** | SQL / KQL | On-the-fly aggregation at query time |
-| **Aggregations (semantic model)** | Power BI / Direct Lake | User aggregation tables mapped to detail tables |
+| **Aggregations (semantic model)** | Power BI (Import over DirectQuery) | User aggregation tables mapped to detail tables (not supported on Direct Lake tables) |
 
 ```sql
 -- Pre-aggregation table in Warehouse
 CREATE TABLE dbo.agg_MonthlySales AS
 SELECT
-    YEAR(OrderDate) AS SalesYear,
-    MONTH(OrderDate) AS SalesMonth,
-    ProductCategory,
-    SUM(Amount) AS TotalAmount,
-    COUNT(*) AS OrderCount
+    d.Year        AS SalesYear,
+    d.Month       AS SalesMonth,
+    p.Category    AS ProductCategory,
+    SUM(f.Amount) AS TotalAmount,
+    COUNT(*)      AS OrderCount
 FROM dbo.FactSales f
 JOIN dbo.DimProduct p ON f.ProductKey = p.ProductKey
 JOIN dbo.DimDate d ON f.DateKey = d.DateKey
-GROUP BY YEAR(OrderDate), MONTH(OrderDate), ProductCategory;
+GROUP BY d.Year, d.Month, p.Category;
 ```
 
-> **Exam Caveat:** Fabric Warehouse supports **materialized views** as a preview feature. They are auto-refreshed when underlying data changes. Do not confuse with standard views, which are computed at query time.
+> **Exam Caveat:** The Fabric **Warehouse does not support materialized views** (they're on its unsupported T-SQL list). The precomputed, self-refreshing option is the Lakehouse **materialized lake view**: defined in Spark SQL, stored as a Delta table, refreshed by Fabric in dependency order (incremental, full, or skip), and able to enforce data-quality `CONSTRAINT ... CHECK` rules. A standard view, by contrast, is computed at query time.
 {: .warning }
 
 ---
@@ -477,17 +504,21 @@ Filtering removes unwanted rows early in the pipeline to reduce processing volum
 
 ## 🔍 2.3 Query and Analyze Data
 
-### 🖱️ Select, Filter, and Aggregate Data by Using the Visual Query Editor
+### 🖱️ Select, Filter, and Aggregate Data by Using the Visual query editor
 
-The **Visual Query Editor** is a drag-and-drop interface available in the Lakehouse SQL Analytics Endpoint and Warehouse.
+The **Visual query editor** is a no-code, drag-and-drop query builder available in the **Warehouse**, the **SQL analytics endpoint** (Lakehouse), and **mirrored databases**. It's built on the Power Query **diagram view**.
 
 Key capabilities:
-- Drag tables onto the canvas and visually define joins
-- Select columns, apply filters, add aggregations without writing SQL
-- Generates T-SQL under the hood — you can switch to SQL view to see the query
-- Supports GROUP BY, ORDER BY, TOP, and WHERE clauses visually
+- Drag tables onto the canvas and visually define joins (merge queries)
+- Select columns, filter rows, group and aggregate without writing SQL
+- Generates T-SQL under the hood — **View SQL** shows the query, and you can save it as a **view**
+- Preview and visualize the results in the editor
 
-> **Exam Tip:** The Visual Query Editor is the correct answer when the scenario describes a **business analyst** or **citizen developer** who needs to query Lakehouse or Warehouse data without writing SQL.
+Limitations to remember:
+- **Read-only:** only `SELECT` (DQL) — no DDL or DML.
+- Only Power Query steps that **fold** to SQL are supported; a step that can't be translated blocks "View SQL" / saving as a view.
+
+> **Exam Tip:** The Visual query editor is the correct answer when the scenario describes a **business analyst** or **citizen developer** who needs to select, filter, or aggregate Lakehouse or Warehouse data **without writing SQL**. If the requirement is to *change* data, it's the wrong tool.
 {: .note }
 
 ---
@@ -529,7 +560,7 @@ GROUP BY p.ProductName
 ORDER BY TotalSales DESC;
 ```
 
-> **Exam Caveat:** The SQL Analytics Endpoint (Lakehouse) supports **read-only** T-SQL: SELECT, CREATE VIEW, CREATE FUNCTION (inline TVF). It does NOT support INSERT, UPDATE, DELETE, CREATE TABLE, or stored procedures.
+> **Exam Caveat:** The SQL Analytics Endpoint (Lakehouse) is **read-only for data**: SELECT, plus CREATE VIEW, CREATE FUNCTION, and CREATE PROCEDURE for read logic, and SQL security (GRANT/DENY, RLS, DDM). It does NOT support INSERT, UPDATE, DELETE, MERGE, or CREATE TABLE.
 {: .warning }
 
 ---
@@ -589,7 +620,7 @@ StormEvents
 
 ### 📐 Select, Filter, and Aggregate Data by Using DAX
 
-DAX queries use the `EVALUATE` statement and are executed in tools like DAX Studio, SSMS (via XMLA endpoint), or Fabric notebook.
+DAX queries use the `EVALUATE` statement. Run them in **DAX query view** (built into Power BI Desktop *and* the web — open the semantic model and write queries without external tools), in DAX Studio or SSMS via the XMLA endpoint, or from a Fabric notebook with **semantic link** (`sempy.fabric.evaluate_dax`). Performance Analyzer can also copy a visual's query into DAX query view.
 
 ```dax
 // Basic EVALUATE query
@@ -665,16 +696,18 @@ flowchart LR
     end
 
     subgraph Ingestion
-        B1["Pipeline\nCopy Activity"]
+        B1["Pipeline Copy activity\n/ Copy job"]
         B2["Dataflow Gen2"]
         B3["Shortcut\n(zero-copy)"]
         B4["Eventstream"]
+        B5["Mirroring\n(CDC replica)"]
     end
 
     subgraph Storage
         C1["Lakehouse\n(Delta tables)"]
         C2["Warehouse\n(T-SQL engine)"]
         C3["Eventhouse\n(KQL Database)"]
+        C4["Mirrored database\n(Delta + SQL endpoint)"]
     end
 
     subgraph Consumption
@@ -684,6 +717,7 @@ flowchart LR
     end
 
     A1 --> B1
+    A1 --> B5
     A2 --> B3
     A3 --> B4
     A4 --> B2
@@ -693,11 +727,13 @@ flowchart LR
     B2 --> C1
     B3 --> C1
     B4 --> C3
+    B5 --> C4
 
     C1 --> D1
     C1 --> D3
     C2 --> D1
     C3 --> D3
+    C4 --> D1
 
     D1 --> D2
 ```
@@ -713,23 +749,27 @@ flowchart LR
 | 3 | Need zero-copy access to ADLS Gen2 files | **OneLake shortcut** |
 | 4 | Business analyst needs to discover endorsed datasets | **OneLake catalog** |
 | 5 | Need to ingest streaming data from Event Hubs | **Eventstream to Eventhouse** |
-| 6 | Self-service, no-code data transform with 300+ transforms | **Dataflow Gen2** |
+| 6 | Self-service, low-code data transforms (Power Query) | **Dataflow Gen2** |
 | 7 | Complex PySpark transforms on large data in lakehouse | **Spark Notebook** |
-| 8 | Bulk batch ingestion from 90+ connectors on a schedule | **Pipeline Copy Activity** |
+| 8 | Orchestrated, parameterized bulk ingestion with dependencies and error handling | **Pipeline Copy activity** |
 | 9 | Need stored procedures and full T-SQL DML | **Warehouse** |
 | 10 | Need Spark + read-only SQL on Delta tables | **Lakehouse** |
 | 11 | Real-time analytics on time-series / IoT data | **Eventhouse (KQL Database)** |
-| 12 | Auto-generate integer surrogate keys in a warehouse | **IDENTITY column** |
-| 13 | Generate surrogate keys in a lakehouse (PySpark) | **monotonically_increasing_id()** |
+| 12 | Auto-generate surrogate keys in a warehouse | **`BIGINT IDENTITY` column** (unique, not sequential) |
+| 13 | Generate surrogate keys in a lakehouse (PySpark) | **`row_number()`** over a window (consecutive) or **`monotonically_increasing_id()`** (unique, gaps) |
 | 14 | Flatten a snowflake schema for a semantic model | **Denormalize into star schema** |
-| 15 | Pre-compute aggregates that auto-refresh on data change | **Materialized view (Warehouse)** |
+| 15 | Pre-compute aggregates that Fabric refreshes automatically | **Materialized lake view (Lakehouse)** — the Warehouse has no materialized views |
 | 16 | Find rows in table A that have no match in table B | **Left Anti join** |
 | 17 | Remove duplicates keeping the most recent row | **ROW_NUMBER() PARTITION BY ... ORDER BY date DESC** |
-| 18 | Non-technical user needs to query warehouse data visually | **Visual Query Editor** |
+| 18 | Non-technical user needs to query warehouse data visually | **Visual query editor** |
 | 19 | DAX query to group and aggregate a semantic model | **EVALUATE + SUMMARIZECOLUMNS** |
 | 20 | Analyze time-series event data with time bucketing | **KQL: summarize ... by bin()** |
-| 21 | Make Eventhouse data queryable by Spark and SQL | **OneLake integration for Eventhouse** |
+| 21 | Make Eventhouse data queryable by Spark and SQL | **OneLake availability** on the KQL database or table |
 | 22 | Ensure Dataflow Gen2 filter runs at the source, not in memory | **Query folding** (check native query) |
+| 23 | Notebooks must read the tables already loaded into an Import semantic model, without another copy | **Semantic model OneLake integration** + a shortcut to the exported Delta tables |
+| 24 | Keep a near-real-time, read-only copy of an Azure SQL database in Fabric with minimal setup and no compute cost for replication | **Mirroring** |
+| 25 | Incrementally load new and changed rows from many source tables on a schedule, without building a pipeline | **Copy job** |
+| 26 | Operational app needs low-latency single-row reads and writes | **SQL database in Fabric** |
 
 ---
 

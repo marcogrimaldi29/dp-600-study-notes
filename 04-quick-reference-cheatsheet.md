@@ -34,13 +34,14 @@ Last-minute review sheet for the DP-600 Microsoft Fabric Analytics Engineer Asso
 | Max Parquet files per table (Direct Lake, F2 / F64) | 1,000 / 5,000 |
 | Max row groups per table (Direct Lake, F2 / F64) | 1,000 / 5,000 |
 | Max model size on OneLake (Direct Lake, F2 / F16 / F64) | 10 GB / 20 GB / Unlimited |
-| XMLA read/write endpoint requirement | **Premium / Fabric F64+** capacity (read available at lower SKUs) |
+| Max memory per model (F2 / F16 / F64) | 3 GB / 5 GB / 25 GB |
+| XMLA endpoint availability | Any **F SKU**, P SKU, or **PPU** — default **Read Only**; set **Read Write** in capacity settings |
+| Free-license viewers can consume Power BI content | **F64+** (or P SKU); below F64 viewers need Pro/PPU |
 | Deployment pipeline stages (max) | **10** (Dev, Test, Prod, plus up to 7 custom stages) |
 | Workspace roles | **4**: Admin, Member, Contributor, Viewer |
 | Sensitivity labels — who can apply | Users with **Information Protection** license + label publishing policy |
-| Incremental refresh — max partitions (Import) | **10,000** per table |
-| Max measures in a single DAX query | Depends on memory; no hard cap but keep below **100** for performance |
-| OneLake file format for Direct Lake | **Delta / Parquet (V-Order optimized)** |
+| OneLake file format for Direct Lake | **Delta / Parquet** (V-Order **recommended**, off by default in new workspaces) |
+| Max .pbix upload / small-format model size | **10 GB** (large format → up to capacity memory) |
 | Max scheduled refreshes per day (Pro) | **8** |
 | Max scheduled refreshes per day (Premium) | **48** |
 
@@ -57,7 +58,8 @@ Last-minute review sheet for the DP-600 Microsoft Fabric Analytics Engineer Asso
 | **Query performance** | Fastest (in-memory) | Depends on source | Fast (columnar from OneLake) | Varies by table |
 | **Data volume** | Limited by capacity memory | No size limit | Guardrails per SKU | Mixed |
 | **Data source** | Any supported | Any supported | **Delta tables in OneLake only** | Any mix |
-| **DAX support** | Full | Full (slower) | Full (with fallback) | Full |
+| **Licensing** | Any | Any | **Fabric capacity only** | Depends on tables |
+| **DAX support** | Full | Full (slower) | Full (calc columns limited) | Full |
 | **Use case** | Small-to-mid datasets, max perf | Enforce source RLS, large data | Fabric-native analytics | Migration, mixed sources |
 | **Refresh needed?** | Yes | No | Framing only | Partial |
 
@@ -66,7 +68,7 @@ flowchart TD
     A[Choose Storage Mode] --> B{Data in OneLake<br/>as Delta tables?}
     B -- Yes --> C{Need real-time<br/>to the second?}
     C -- No --> D["**Direct Lake**<br/>Best of both worlds"]
-    C -- Yes --> E["**DirectQuery**<br/>to Lakehouse SQL endpoint"]
+    C -- Yes --> E["**DirectQuery**<br/>to the SQL analytics endpoint"]
     B -- No --> F{Data source<br/>supports DirectQuery?}
     F -- No --> G["**Import**<br/>Schedule refresh"]
     F -- Yes --> H{Need max<br/>performance?}
@@ -74,7 +76,7 @@ flowchart TD
     H -- No --> I["**DirectQuery**<br/>or Composite"]
 ```
 
-> **Exam Caveat:** Direct Lake is **only** available for Delta tables stored in OneLake (Lakehouse or Warehouse). If data is in Azure SQL or Synapse, you cannot use Direct Lake.
+> **Exam Caveat:** Direct Lake is **only** available for Delta tables stored in OneLake (Lakehouse or Warehouse). If data is in Azure SQL or Synapse, you cannot use Direct Lake directly — **mirror** it into Fabric first (mirrored databases expose Delta tables that Direct Lake can read).
 {: .warning }
 
 ---
@@ -127,7 +129,7 @@ flowchart TD
 > **Exam Caveat:** Time intelligence functions require a **contiguous Date table** marked as a date table. Gaps in dates break these functions.
 {: .warning }
 
-### 🪟 Windowing Functions (New in Fabric)
+### 🪟 DAX Window Functions
 
 | Function | Purpose |
 |----------|---------|
@@ -162,12 +164,13 @@ CALCULATE(
 
 | Layer | RLS (Row-Level Security) | CLS (Column-Level Security) | OLS (Object-Level Security) |
 |-------|--------------------------|-----------------------------|-----------------------------|
-| **What it restricts** | Rows visible to user | Columns visible to user | Tables or columns hidden from user |
-| **Defined in** | Semantic model (DAX filter) | Semantic model (role config) | Semantic model (role config) |
-| **Implementation** | DAX expression on table | Column permissions in role | `None` or `Read` metadata permission |
-| **Tooling** | Power BI Desktop / XMLA / Tabular Editor | XMLA / Tabular Editor only | XMLA / Tabular Editor only |
-| **Works with Direct Lake?** | ✅ | ✅ | ✅ |
-| **Test method** | "View as Role" in service | XMLA query as role | XMLA query as role |
+| **What it restricts** | Rows visible to user | Columns a user can query | Tables or columns — data **and** metadata |
+| **Semantic model** | DAX filter on a role | = **OLS on columns** | `metadataPermission: none` on table/column |
+| **Warehouse / SQL endpoint** | `CREATE SECURITY POLICY` + predicate fn | `GRANT SELECT ON t(cols)` | `GRANT` / `DENY` on objects |
+| **Lakehouse files/tables** | OneLake security role row filter | OneLake security role column selection | OneLake security role scope |
+| **Semantic-model tooling** | Desktop "Manage roles", web modeling, TMDL, Tabular Editor | TMDL view (Desktop) / Tabular Editor | TMDL view (Desktop) / Tabular Editor |
+| **Works with Direct Lake?** | ✅ (model RLS) | ✅ (model OLS) | ✅ |
+| **Test method** | "View as" (Desktop) / "Test as role" (service) | Same | Same |
 
 ```mermaid
 flowchart LR
@@ -180,38 +183,37 @@ flowchart LR
     style C fill:#1a3a5c,stroke:#4a9eff
 ```
 
-> **Exam Caveat:** RLS is defined in the **semantic model**, NOT in the Lakehouse or Warehouse. Users with **Admin, Member, or Contributor** roles (all have model edit access) **bypass** RLS when browsing data in the workspace — only **Viewers** (and read/build-only consumers) are subject to it.
+> **Exam Caveat:** Semantic-model RLS lives in the **semantic model**; Warehouse/SQL-endpoint RLS and OneLake security RLS are **separate** layers. In every case, workspace **Admin, Member, and Contributor** roles are **never** filtered — only **Viewers** (and read/build-only consumers via apps or sharing) are subject to RLS/OLS.
 {: .warning }
 
 ---
 
 ## 🗄️ 5 — Data Store Selection
 
-| Criteria | Lakehouse | Warehouse | KQL Database | Eventhouse |
-|----------|-----------|-----------|--------------|------------|
-| **Query language** | Spark SQL, PySpark | T-SQL | KQL (Kusto) | KQL |
-| **File format** | Delta (Parquet) in OneLake | Delta (Parquet) in OneLake (T-SQL–managed) | Columnar time-series | Columnar time-series |
-| **Best for** | Data engineering, ML, ELT | Enterprise BI, complex joins, stored procs | Log/telemetry analytics | Streaming + real-time analytics |
-| **Schema** | Schema-on-read & schema-on-write | Schema-on-write (strict) | Semi-structured, schemaless | Semi-structured |
-| **Transactions** | ACID via Delta | Full T-SQL transactions | Append-optimized | Append-optimized |
-| **SQL endpoint?** | ✅ (read-only auto-generated) | Native | ❌ (KQL only) | ❌ (KQL only) |
-| **Direct Lake support** | ✅ | ✅ | ❌ | ❌ |
+| Criteria | Lakehouse | Warehouse | Eventhouse (KQL DB) | SQL database |
+|----------|-----------|-----------|---------------------|--------------|
+| **Query language** | Spark SQL, PySpark (+ read-only T-SQL) | T-SQL | KQL (+ T-SQL subset) | T-SQL |
+| **Storage** | Delta (Parquet) in OneLake | Delta (Parquet) in OneLake (T-SQL–managed) | Columnar KQL store; Delta copy is **opt-in** (OneLake availability) | Row store, auto-mirrored to Delta in OneLake |
+| **Best for** | Data engineering, ML, ELT | Enterprise BI, complex joins, stored procs | Streaming, logs, telemetry, time series | OLTP / operational apps |
+| **Schema** | Schema-on-read & schema-on-write | Schema-on-write (strict) | Schema-on-write, semi-structured (`dynamic`) columns | Schema-on-write, enforced constraints |
+| **Transactions** | ACID per table (Delta) | Multi-table T-SQL transactions | Append-optimized | Full OLTP transactions |
+| **SQL analytics endpoint?** | ✅ (read-only) | Native | ✅ when OneLake availability is on | ✅ (read-only, over the mirrored Delta) |
+| **Direct Lake support** | ✅ | ✅ | ✅ via OneLake availability | ✅ |
 
-> **Exam Tip:** If the question mentions **T-SQL stored procedures** or **views with complex joins**, the answer is **Warehouse**. If it mentions **streaming** or **IoT telemetry**, think **Eventhouse / KQL Database**.
+> **Exam Tip:** If the question mentions **T-SQL stored procedures** or **views with complex joins**, the answer is **Warehouse**. If it mentions **streaming** or **IoT telemetry**, think **Eventhouse / KQL Database**. If it mentions an **operational/OLTP** app, think **SQL database in Fabric**.
 {: .note }
 
 ---
 
 ## 📥 6 — Ingestion Method Selection
 
-| Criteria | Dataflow Gen2 | Notebook (Spark) | Copy Activity (Pipeline) | Shortcut |
-|----------|---------------|-------------------|--------------------------|----------|
-| **Skill level** | Low-code (Power Query) | Pro-code (Python/Scala) | Low-code (config) | No-code |
-| **Transformation** | ✅ (M / Power Query) | ✅ (full Spark) | Minimal (mapping only) | None (pass-through) |
-| **Best for** | Simple transforms, small data | Complex ETL, ML prep, large data | Bulk copy between stores | Virtualized access, zero-copy |
-| **Scheduling** | Pipeline or standalone | Pipeline | Pipeline | Always live |
-| **Compute** | Fabric Dataflow compute | Spark pool | Pipeline IR | None |
-| **Writes Delta?** | ✅ (to Lakehouse) | ✅ | ✅ | ❌ (reads in-place) |
+| Criteria | Dataflow Gen2 | Notebook (Spark) | Copy activity (Pipeline) | Copy job | Mirroring | Shortcut |
+|----------|---------------|-------------------|--------------------------|----------|-----------|----------|
+| **Skill level** | Low-code (Power Query) | Pro-code (Python/Scala) | Low-code (config) | No/low-code | No-code | No-code |
+| **Transformation** | ✅ (M / Power Query) | ✅ (full Spark) | Minimal (mapping) | Minimal (mapping) | None | None (pass-through) |
+| **Best for** | Self-service transforms | Complex ETL, ML prep, large data | Orchestrated, metadata-driven loads | Bulk / incremental / CDC copy without a pipeline | Continuous replica of an operational DB | Virtualized access, zero-copy |
+| **Scheduling** | Own schedule or pipeline | Schedule or pipeline | Pipeline triggers | Built-in schedule | Continuous | Always live |
+| **Writes Delta?** | ✅ | ✅ | ✅ | ✅ | ✅ (read-only replica) | ❌ (reads in-place) |
 
 > **Exam Caveat:** **Shortcuts** do not copy data — they create a virtualized reference. Data stays in the source (ADLS, S3, or another OneLake location). This is critical for questions about data residency and latency.
 {: .warning }
@@ -224,7 +226,7 @@ flowchart LR
 
 | Fact | Detail |
 |------|--------|
-| Required format | **Delta tables** with **V-Order** optimization |
+| Required format | **Delta tables** in OneLake (**V-Order recommended**, not required) |
 | Where data lives | **OneLake** (Lakehouse or Warehouse) |
 | Framing | Snapshot of Delta log metadata; determines which Parquet files to read |
 | Refresh type | **Framing** (lightweight metadata update, not data copy) |
@@ -233,7 +235,7 @@ flowchart LR
 | Fallback behavior | **Direct Lake on SQL** only — falls back to **DirectQuery** via SQL endpoint. **Direct Lake on OneLake never falls back** (query/refresh errors instead) |
 | Fallback triggers (SQL flavour) | SQL view, SQL-based RLS/CLS, guardrails exceeded, unsupported scenario |
 | Disable fallback | `DirectLakeBehavior = DirectLakeOnly` (query errors instead of going to DQ) |
-| V-Order | Special sort order applied at write time; improves read performance dramatically |
+| V-Order | Write-time Parquet optimization; big win for Direct Lake cold-cache queries. **Off by default** in new workspaces (`writeHeavy` profile) — enable it or use `readHeavyForPBI` |
 
 ```mermaid
 flowchart TD
@@ -259,11 +261,11 @@ flowchart TD
 | **DirectQuery fallback** | ❌ Never (errors instead) | ✅ Yes (unless disabled) |
 | **Composite with Import/DQ** | ✅ Yes | ❌ No (only via a new composite in Desktop) |
 | **SQL-endpoint RLS/CLS/OLS** | ❌ Not applied (uses OneLake security) | ✅ Enforced (delegated identity) |
-| **SQL views as tables** | ❌ (use materialized view / Import) | ✅ but falls back to DirectQuery |
+| **SQL views as tables** | ❌ (use a materialized lake view / Import) | ✅ but falls back to DirectQuery |
 | **Created from** | Service (OneLake catalog), Desktop, SQL endpoint page | SQL analytics endpoint page only |
 | **Guardrail exceeded** | Refresh fails; not queryable | Refresh warns; queries fall back to DQ |
 
-> **Exam Caveat:** Direct Lake **does not import data** into the model — it reads Parquet from OneLake into memory on demand, and a "refresh" is just **framing** (metadata pointer). The **on OneLake vs on SQL** distinction (fallback, multi-source, composite, security) is the new July 2026 exam objective.
+> **Exam Caveat:** Direct Lake **does not import data** into the model — it reads Parquet from OneLake into memory on demand, and a "refresh" is just **framing** (metadata pointer). The **on OneLake vs on SQL** distinction (fallback, multi-source, composite, security) was added in the July 2026 revision and is still current as of the October 19, 2026 revision.
 {: .warning }
 
 ---
@@ -273,23 +275,26 @@ flowchart TD
 1. **RLS is defined in the semantic model**, not in the Lakehouse, Warehouse, or data source.
 2. **Direct Lake requires Delta tables in OneLake** — no CSV, no Azure SQL, no external Parquet.
 3. **Viewers cannot build reports** on shared semantic models without **Build permission**.
-4. **Workspace Admin, Member, and Contributor roles bypass RLS** when browsing data directly in the workspace (they have model edit access); only **Viewers** and read/build-only consumers are filtered by RLS.
-5. **XMLA read/write** requires at minimum **Power BI Premium Per User (PPU)** or **Fabric F64+** for write; read is available at lower SKUs.
+4. **Workspace Admin, Member, and Contributor roles are never filtered by RLS/OLS** — they have edit access to the model, however they open the content; only **Viewers** and read/build-only consumers (apps, sharing) are filtered.
+5. **XMLA endpoints** work on **any F SKU**, P SKU, or **PPU** — not Pro. They default to **Read Only**; a capacity admin must switch them to **Read Write** for Tabular Editor / deployment tools.
 6. **Deployment pipelines** compare content between stages — they do **not** version-control code (use Git integration for that).
 7. **Incremental refresh** in Import mode creates partitions automatically — you configure the `RangeStart` and `RangeEnd` parameters, not partition logic.
-8. **Sensitivity labels** require **Microsoft Purview Information Protection**; they propagate downstream when data is exported.
+8. **Sensitivity labels** require **Microsoft Purview Information Protection**; they're inherited downstream and travel with exports (Excel, PDF, PowerPoint).
 9. **SUMMARIZE should not be used to add new measure columns** — use `SUMMARIZECOLUMNS` or `ADDCOLUMNS(SUMMARIZE(...))` instead.
 10. **Composite models** can mix Import and DirectQuery tables. **Direct Lake on OneLake** tables **can** now be mixed with Import tables in one model (web modeling / Desktop live edit); **Direct Lake on SQL** cannot — you'd build a new composite on top of it in Desktop.
 11. **Shortcuts are read-only** virtual references — they do not move, copy, or transform data.
-12. **CLS and OLS cannot be configured in Power BI Desktop** — they require XMLA endpoint or Tabular Editor.
+12. **OLS (incl. column security) has no point-and-click UI in Power BI Desktop** — script it in Desktop's **TMDL view** or use Tabular Editor. "Only external tools can do it" is outdated.
 13. **Time intelligence functions require a Date table** marked as a date table with no gaps.
-14. **V-Order** is a write-time optimization — it must be applied when data is written to Delta, not at query time.
+14. **V-Order** is a write-time optimization — applied when data is written (or by `OPTIMIZE ... VORDER`), not at query time — and it's **off by default** in new workspaces.
 15. **`KEEPFILTERS`** does not remove context; it **intersects** with existing filters. Contrast with `CALCULATE` which overrides.
 16. **Direct Lake fallback to DirectQuery** happens **only with Direct Lake on SQL** (via the SQL analytics endpoint). **Direct Lake on OneLake never falls back** — over-guardrail/unsupported queries error and refresh fails instead.
 17. **Git integration** in Fabric works at the **workspace level**, not at individual item level.
-18. **Dataflow Gen2** outputs to Lakehouse/Warehouse; it does **not** load directly into a semantic model like legacy Power BI dataflows could.
+18. **Dataflow Gen2** writes to **data destinations** (Lakehouse, Warehouse, KQL DB, SQL database, Azure SQL, …); legacy **Gen1** dataflows only keep data in their own storage for semantic models to connect to.
 19. **`USERELATIONSHIP`** only works with **inactive** relationships — you cannot reference a relationship that does not exist.
-20. **Large format datasets** (over 10 GB) require Premium or Fabric capacity — Pro licenses are capped.
+20. **Large format semantic models** (over 10 GB) require Fabric/Premium capacity or PPU — Pro models are capped at 1 GB.
+21. **Warehouse** supports `MERGE` (GA) and `BIGINT IDENTITY` keys (no seed/increment, not sequential) — but **no materialized views** (use a Lakehouse **materialized lake view**).
+22. **Default semantic models are gone** — since Sept 2025 a new lakehouse/warehouse does **not** auto-create one; create the semantic model explicitly.
+23. **Endorsement has three badges**: Promoted (anyone with write permission), Certified, and Master data (admin-authorized users only).
 
 > **Exam Tip:** When two answers both seem correct, ask yourself: "Where is this configured?" The exam loves testing whether something is set in the semantic model, the workspace, the data source, or the admin portal.
 {: .note }
@@ -305,18 +310,20 @@ flowchart TD
 - [ ] I understand Git integration scope (workspace-level, supported item types)
 - [ ] I can configure sensitivity labels and explain downstream inheritance
 - [ ] I know when to use XMLA endpoints and which SKUs support read vs. read/write
-- [ ] I can describe the difference between RLS, CLS, and OLS and where each is configured
-- [ ] I understand how workspace Admin/Member roles interact with RLS
+- [ ] I can describe the difference between RLS, CLS, and OLS and where each is configured (semantic model vs Warehouse/SQL endpoint vs OneLake security)
+- [ ] I understand that RLS/OLS never apply to workspace Admins, Members, or Contributors
+- [ ] I know the three endorsement badges and who can apply each
+- [ ] I know the PBIP folder layout (PBIR report + TMDL model) and deployment-pipeline permissions/rules
 
 ### 🔄 Domain 2 — Prepare Data (45-50%)
 
-- [ ] I can choose between Lakehouse, Warehouse, KQL Database, and Eventhouse
-- [ ] I know when to use Dataflow Gen2 vs. Notebook vs. Pipeline Copy Activity vs. Shortcut
+- [ ] I can choose between Lakehouse, Warehouse, Eventhouse, and SQL database
+- [ ] I know when to use Dataflow Gen2 vs. Notebook vs. Pipeline Copy activity vs. Copy job vs. Mirroring vs. Shortcut
 - [ ] I can design a star schema with fact and dimension tables
 - [ ] I understand how Shortcuts work and their limitations (read-only, no transformation)
-- [ ] I can write basic Spark SQL, T-SQL, and KQL queries
-- [ ] I know the incremental refresh parameter pattern (`RangeStart` / `RangeEnd`)
-- [ ] I can describe Delta Lake format, V-Order, and their role in Direct Lake
+- [ ] I can select, filter, and aggregate with the Visual query editor, T-SQL, KQL, and DAX (`EVALUATE` in DAX query view)
+- [ ] I can explain OneLake integration for Eventhouse (OneLake availability) and for semantic models (Import tables exported to Delta)
+- [ ] I can describe Delta Lake format, V-Order (off by default), and their role in Direct Lake
 
 ### 📐 Domain 3 — Implement and Manage Semantic Models (25-30%)
 
@@ -328,7 +335,9 @@ flowchart TD
 - [ ] I know when to use SUMMARIZECOLUMNS vs. SUMMARIZE
 - [ ] I can implement time intelligence with a proper Date table
 - [ ] I understand USERELATIONSHIP for role-playing dimensions
-- [ ] I can configure RLS with DAX and test it with "View as Role"
+- [ ] I can configure RLS with DAX and test it with "View as" (Desktop) / "Test as role" (service)
+- [ ] I know the incremental refresh parameter pattern (`RangeStart` / `RangeEnd`) and when large semantic model format is needed
+- [ ] I can create calculation groups, dynamic format strings, and field parameters in Power BI Desktop
 - [ ] I know how to optimize a model (remove unused columns, avoid bi-directional filters, use variables)
 
 ---

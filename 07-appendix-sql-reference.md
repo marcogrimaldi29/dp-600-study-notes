@@ -30,8 +30,9 @@ Syntax reference for **T-SQL** as it is tested on DP-600. In Fabric, T-SQL is th
 | Surface | T-SQL support | Read / Write |
 |---------|---------------|--------------|
 | **Warehouse** | Full Fabric T-SQL surface | **Read + Write** (DDL & DML) |
-| **Lakehouse SQL analytics endpoint** | Query subset | **Read-only** (`SELECT`, views, functions) |
-| **KQL Database** | ❌ (uses KQL) | — |
+| **Lakehouse SQL analytics endpoint** | Query subset | **Read-only** for data (`SELECT`, plus views, functions, stored procedures, SQL security) |
+| **SQL database in Fabric** | Full Azure SQL T-SQL (OLTP) | **Read + Write** |
+| **KQL Database** | Mostly KQL (a T-SQL subset is accepted) | Read |
 | **Notebook (Spark)** | ❌ T-SQL — uses **Spark SQL** | Read + Write |
 | **Semantic model** | ❌ (uses DAX) | — |
 
@@ -114,7 +115,25 @@ WITH (FILE_TYPE = 'PARQUET');
 > **Exam Tip:** `COPY INTO` is the **recommended high-throughput** way to bulk-load files into a Warehouse table. `CTAS` is best for transforming/materializing query results into a new table. Both are Warehouse-only (write) operations.
 {: .note }
 
-> **Exam Caveat:** Fabric Warehouse tables **do not support `IDENTITY` columns** or auto-increment keys, and there is **no `MERGE`** for a long time — check the current surface, but the exam still leans on generating surrogate keys with `ROW_NUMBER()` rather than `IDENTITY`.
+```sql
+-- Surrogate key: BIGINT IDENTITY only — no seed/increment
+CREATE TABLE dbo.DimProduct (
+    ProductKey  BIGINT IDENTITY,
+    ProductID   VARCHAR(20) NOT NULL,
+    ProductName VARCHAR(100)
+);
+
+-- Upsert from staging (MERGE is GA in Fabric Warehouse)
+MERGE dbo.DimProduct AS t
+USING stg.Product     AS s
+    ON t.ProductID = s.ProductID
+WHEN MATCHED THEN
+    UPDATE SET t.ProductName = s.ProductName
+WHEN NOT MATCHED BY TARGET THEN
+    INSERT (ProductID, ProductName) VALUES (s.ProductID, s.ProductName);
+```
+
+> **Exam Caveat:** Fabric Warehouse supports **`IDENTITY`** surrogate keys — but only as **`BIGINT IDENTITY`**: no seed/increment, values are **unique but not sequential** (gaps are normal), and you can't add an identity column with `ALTER TABLE` (rebuild with CTAS). **`MERGE` is GA** for upserts. Tables do **not** support `NVARCHAR`, `DATETIME`, `MONEY`, or `TINYINT` (use `VARCHAR`, `DATETIME2`, `DECIMAL`, `SMALLINT`), `DEFAULT` constraints, or computed columns.
 {: .warning }
 
 ---
@@ -142,7 +161,7 @@ SELECT * FROM Ranked WHERE rn = 1;
 | **CTE** (`WITH`) | ❌ | Single statement that follows it |
 | **`#temp` table** | Session-scoped data | Current session |
 
-> **Exam Caveat:** A **CTE exists only for the single statement immediately after it** — you cannot reference a CTE in a second, separate query. For reuse across statements use a **view** or a temp table. Also, the SQL analytics endpoint allows creating **views and functions** (metadata) even though it's read-only for data.
+> **Exam Caveat:** A **CTE exists only for the single statement immediately after it** — you cannot reference a CTE in a second, separate query. For reuse across statements use a **view** or a temp table. Also, the SQL analytics endpoint allows creating **views, functions, and stored procedures** even though it's read-only for data. Recursive CTEs aren't supported in Fabric Warehouse.
 {: .warning }
 
 ---
@@ -185,7 +204,7 @@ JOIN LakehouseDB.dbo.Customer  AS c
 GROUP BY c.Region;
 ```
 
-> **Exam Caveat:** Cross-item queries work **without copying data** as long as the items are in the **same Fabric workspace** (or added to the query as sources). This is a "how do I join a Warehouse to a Lakehouse without ETL" answer — three-part naming, no data movement.
+> **Exam Caveat:** Cross-item queries work **without copying data** as long as the items are in the **same Fabric workspace** (and region). To reach a table in **another workspace**, create a **OneLake shortcut** to it in a local lakehouse first. This is a "how do I join a Warehouse to a Lakehouse without ETL" answer — three-part naming, no data movement.
 {: .warning }
 
 ---
@@ -221,7 +240,7 @@ CREATE SECURITY POLICY dbo.RegionFilter
 1. **SQL analytics endpoint is read-only** — writes require a **Warehouse**.
 2. **Spark SQL ≠ T-SQL** — Notebooks use Spark SQL; `COPY INTO`/`CTAS` are Warehouse T-SQL.
 3. **No enforced PK/FK/UNIQUE** — constraints are `NOT ENFORCED` metadata only.
-4. **No `IDENTITY`/auto-increment** — generate keys with `ROW_NUMBER()`.
+4. **`IDENTITY` = `BIGINT IDENTITY` only** — no seed/increment, unique but not sequential. **`MERGE` is GA.**
 5. **`WHERE` before `HAVING`** — `WHERE` on rows, `HAVING` on aggregated groups.
 6. **`SELECT` aliases aren't visible in `WHERE`/`GROUP BY`** (only in `ORDER BY`).
 7. **CTEs live for one statement only** — use views/temp tables for reuse.
@@ -232,6 +251,7 @@ CREATE SECURITY POLICY dbo.RegionFilter
 12. **Dynamic Data Masking is cosmetic** — not a real access boundary.
 13. **`ROW_NUMBER` vs `RANK` vs `DENSE_RANK`** differ on tie handling (gaps vs no gaps).
 14. **The SQL endpoint auto-syncs** from the Lakehouse — new Delta tables may lag briefly before appearing; a manual refresh/metadata sync can be needed.
+15. **Not supported in Fabric Warehouse:** materialized views, triggers, recursive CTEs, sequences, `NVARCHAR`/`DATETIME`/`MONEY` columns, `DEFAULT` constraints, computed columns.
 
 > **Exam Tip:** When a question gives a scenario and asks "which store / which language," anchor on two facts: **writes need a Warehouse (T-SQL) or Spark (Lakehouse)**, and **the SQL analytics endpoint is query-only**. Half of the SQL-flavoured items resolve from that alone.
 {: .note }

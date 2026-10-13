@@ -17,7 +17,7 @@
 |--------|------|
 | 🏅 Certification | Microsoft Certified: Fabric Analytics Engineer Associate |
 | 📝 Passing Score | **700 / 1000** |
-| 💶 Exam Price | **~€26 EUR** *(varies by country; VAT may apply)* |
+| 💶 Exam Price | **~€126 EUR** *(varies by country; VAT may apply)* |
 | ⏱️ Duration | **100 minutes** *(120 min seat time incl. check-in)* |
 | ❓ Question Types | MCQ, multi-select, drag-and-drop, case studies |
 | 🔁 Renewal | **Annual** via free online assessment on Microsoft Learn |
@@ -27,7 +27,7 @@
 
 ## 📊 Official Domain Breakdown
 
-> ⚠️ **Official ranges** from the Microsoft study guide (updated April 2026)
+> ⚠️ **Official ranges** from the Microsoft study guide (skills measured as of October 19, 2026)
 
 ```mermaid
 pie title Exam Domain Weights of the DP-600 (official ranges)
@@ -84,13 +84,13 @@ dp-600-study-notes/
 | Resource | Link |
 |----------|------|
 | 📚 Microsoft's DP-600 Certification Learning Paths | [Certification Learning Paths](https://learn.microsoft.com/en-us/credentials/certifications/fabric-analytics-engineer-associate/) |
-| 📄 Official Exam Page | [DP-600 Exam](https://learn.microsoft.com/en-us/credentials/certifications/exams/dp-600/) |
-| 📋 Skills Measured / Study Guide | [Official Study Guide](https://learn.microsoft.com/en-gb/credentials/certifications/resources/study-guides/dp-600) |
+| 🖥️ Exam Sandbox | [Try the exam interface](https://aka.ms/examdemo) |
+| 📋 Skills Measured / Study Guide | [Official Study Guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-600) |
 | 🧪 Free Practice Assessment | [Practice Assessment](https://learn.microsoft.com/en-us/credentials/certifications/exams/dp-600/practice/assessment?assessment-type=practice&assessmentId=90) |
-| 🎬 Exam Readiness Videos | [Exam Readiness Zone](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-dp-600-plan-implement-and-manage-a-solution-for-data-analytics) |
+| 🎬 Exam Readiness Videos | Exam Readiness Zone: [Domain 1](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-dp-600-maintain-a-data-analytics-solution) · [Domain 2](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-dp-600-prepare-data) · [Domain 3](https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-dp-600-implement-and-manage-semantic-models) |
 | 📚 Microsoft Fabric Documentation | [Fabric Docs](https://learn.microsoft.com/en-us/fabric/) |
 | 🎓 Instructor-Led Course | [DP-600T00-A (4 days)](https://learn.microsoft.com/en-us/training/courses/dp-600t00) |
-| 💶 EU Exam Pricing | [Pearson VUE Microsoft](https://home.pearsonvue.com/microsoft) |
+| 💶 EU Exam Pricing | [Pearson VUE Microsoft](https://www.pearsonvue.com/us/en/microsoft.html) |
 
 ---
 
@@ -131,11 +131,11 @@ These notes are hosted on **GitHub Pages** and published as a searchable website
 
 The site includes full-text search, Mermaid diagram rendering, and mobile-friendly navigation for on-the-go review.
 
-These notes are designed to be a structured, exam-focused summary of the most important concepts and services based on the official [Microsoft DP-600 Study Guide](https://learn.microsoft.com/en-gb/credentials/certifications/resources/study-guides/dp-600) and its criteria.
+These notes are designed to be a structured, exam-focused summary of the most important concepts and services based on the official [Microsoft DP-600 Study Guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-600) and its criteria.
 
 Additional resources and study notes maintained by me, such as the **[📘 AZ-305 Study Notes](https://marcogrimaldi29.com/az-305-study-notes/)**, the **[📘 DP-700 Study Notes](https://marcogrimaldi29.com/dp-700-study-notes/)**, and more, are also available for those pursuing the Microsoft and Azure certifications at the following Landing Page:
 
-👉 **[🧑‍🏫 Microsoft Study Notes: Central Hub](https://marcogrimaldi29.com/microsoft-study-notes/)**
+👉 **[📘 Study Notes Hub](https://marcogrimaldi29.com/study-notes/)**
 
 ---
 
@@ -176,7 +176,7 @@ If these notes helped you on your DP-600 journey, there are a couple of ways to 
 
 The [Just the Docs](https://github.com/just-the-docs/just-the-docs) theme is used for a clean, documentation-style layout. Licensed under [MIT](https://opensource.org/license/MIT).
 
-Created with the help of AI. Model used: [Claude Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6). The content has been reviewed and edited by the author for accuracy and clarity, but may contain errors. Always verify against the latest [Microsoft documentation](https://learn.microsoft.com/en-us/fabric/).
+Created with the help of AI (Claude by [Anthropic](https://www.anthropic.com/)). The content has been reviewed and edited by the author for accuracy and clarity, but may contain errors. Always verify against the latest [Microsoft documentation](https://learn.microsoft.com/en-us/fabric/).
 
 > *Not affiliated with or endorsed by Microsoft.*
 

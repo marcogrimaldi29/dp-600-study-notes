@@ -62,7 +62,7 @@ LOCATION 'Files/curated/sales';
 > **Exam Caveat:** Dropping a **managed** table deletes the underlying files; dropping an **external** table leaves the data in place. This managed-vs-external distinction (and who owns the files) is a recurring exam question.
 {: .warning }
 
-> **Exam Tip:** In Fabric, `USING DELTA` is the default and preferred format — Delta enables ACID, time travel, and Direct Lake. Tables must be **Delta (V-Order optimized)** to be consumed by a Direct Lake semantic model.
+> **Exam Tip:** In Fabric, `USING DELTA` is the default and preferred format — Delta enables ACID, time travel, and Direct Lake. Tables must be **Delta** to be consumed by a Direct Lake semantic model; **V-Order is recommended** for Direct Lake performance but not required (and it's off by default in new workspaces).
 {: .note }
 
 ---
@@ -86,7 +86,7 @@ WHEN NOT MATCHED BY SOURCE THEN DELETE;
 | `DELETE FROM ... WHERE` | Row deletes |
 | `INSERT INTO / OVERWRITE` | Append / replace |
 
-> **Exam Caveat:** `MERGE`, `UPDATE`, and `DELETE` on individual rows are **Delta/Spark capabilities** — the classic scenario "upsert changed rows into a Lakehouse table" points to a **Notebook**, not the SQL analytics endpoint (read-only) and historically not the Warehouse.
+> **Exam Caveat:** `MERGE`, `UPDATE`, and `DELETE` on individual rows are **Delta/Spark capabilities** — the classic scenario "upsert changed rows into a Lakehouse table" points to a **Notebook**, not the SQL analytics endpoint (read-only). (The Warehouse has its own T-SQL `MERGE`, but it can't write Lakehouse tables.)
 {: .warning }
 
 ---
@@ -103,7 +103,7 @@ WHEN NOT MATCHED BY SOURCE THEN DELETE;
 > **Exam Caveat:** `VACUUM` permanently removes old data files, which **breaks time travel** beyond the retention window. Running `VACUUM RETAIN 0 HOURS` can destroy the ability to roll back — the default 7-day retention exists to protect time travel. This trade-off is exam-favourite.
 {: .warning }
 
-> **Exam Tip:** The **small-files problem** (slow reads from thousands of tiny Parquet files) is solved with `OPTIMIZE` (compaction) and, for filter-heavy queries, `ZORDER BY`. Fabric also applies **V-Order** on write to boost Direct Lake/Power BI read speed.
+> **Exam Tip:** The **small-files problem** (slow reads from thousands of tiny Parquet files) is solved with `OPTIMIZE` (compaction) and, for filter-heavy queries, `ZORDER BY`. **V-Order** (off by default in new workspaces — enable it per session/table, use the `readHeavyForPBI` resource profile, or run `OPTIMIZE t VORDER`) boosts Direct Lake/Power BI read speed.
 {: .note }
 
 ---
@@ -142,10 +142,30 @@ SELECT Category, SUM(Amount) FROM recent_sales GROUP BY Category;
 | **Temp view** (`createOrReplaceTempView`) | Current Spark session | ❌ |
 | **Global temp view** (`global_temp.`) | All sessions on the cluster | ❌ |
 | **View** (`CREATE VIEW`) | Catalog (metastore) | Definition only |
+| **Materialized lake view** (`CREATE MATERIALIZED LAKE VIEW`) | Lakehouse | ✅ Persisted as a Delta table, refreshed by Fabric |
 | **Table** (`saveAsTable`) | Lakehouse | ✅ Data persisted |
 
-> **Exam Caveat:** A **temp view is session-scoped** — it vanishes when the Spark session ends and is invisible to the SQL analytics endpoint or Power BI. To expose data to downstream tools you must write a **managed/external Delta table** (`saveAsTable` / `CREATE TABLE`), not a temp view.
+> **Exam Caveat:** A **temp view is session-scoped** — it vanishes when the Spark session ends and is invisible to the SQL analytics endpoint or Power BI. Even a persisted **Spark view** (`CREATE VIEW`) is only readable by Spark and the lakehouse — the SQL analytics endpoint and semantic models don't recognize it. To expose data to downstream tools, write a **managed/external Delta table** (`saveAsTable` / `CREATE TABLE`) or a **materialized lake view**.
 {: .warning }
+
+### Materialized lake views
+
+```sql
+%%sql
+CREATE MATERIALIZED LAKE VIEW IF NOT EXISTS gold.monthly_sales
+(
+    CONSTRAINT has_category CHECK (Category IS NOT NULL) ON MISMATCH DROP
+)
+AS
+SELECT Category, date_trunc('month', OrderDate) AS SalesMonth, SUM(Amount) AS TotalAmount
+FROM silver.sales
+GROUP BY Category, date_trunc('month', OrderDate);
+```
+
+A **materialized lake view (MLV)** is a declarative, persisted transformation: the result is stored as a Delta table, Fabric tracks the lineage between MLVs and refreshes them in dependency order on a schedule (incrementally when the sources have change data feed enabled, otherwise full — or it skips when nothing changed), and `CONSTRAINT ... CHECK ... ON MISMATCH DROP | FAIL` enforces data quality. It's the Fabric answer to "pre-computed aggregates that refresh automatically" — the **Warehouse has no materialized views**.
+
+> **Exam Tip:** MLVs are ideal for **medallion** bronze → silver → gold steps written in SQL. Because the output is a real Delta table, it can back a **Direct Lake on OneLake** model — unlike a plain SQL view.
+{: .note }
 
 ---
 
@@ -153,7 +173,7 @@ SELECT Category, SUM(Amount) FROM recent_sales GROUP BY Category;
 
 | Aspect | Spark SQL (Lakehouse) | T-SQL (Warehouse) |
 |--------|-----------------------|-------------------|
-| Upsert | ✅ `MERGE` | Historically limited |
+| Upsert | ✅ `MERGE INTO` (Delta) | ✅ `MERGE` (GA) |
 | Create-from-query | `CREATE TABLE ... USING DELTA AS SELECT` | `CREATE TABLE AS SELECT` (CTAS) |
 | Bulk load | `spark.read...saveAsTable` | `COPY INTO` |
 | String concat | `concat()` / `||` | `+` or `CONCAT()` |
@@ -175,7 +195,7 @@ SELECT Category, SUM(Amount) FROM recent_sales GROUP BY Category;
 5. **`VACUUM` breaks time travel** past the retention window (default 7 days).
 6. **Temp views are session-scoped** — write a Delta table to expose data downstream.
 7. **`LIMIT` not `TOP`; back-ticks not brackets** in Spark SQL.
-8. **`USING DELTA` is required** for Direct Lake consumption (plus V-Order).
+8. **`USING DELTA` is required** for Direct Lake consumption (V-Order recommended, not required).
 9. **Spark SQL and PySpark are interchangeable** within a Notebook (`spark.sql()` bridges them) — see [Appendix E — PySpark](/dp-600-study-notes/09-appendix-pyspark-reference/).
 10. **Time travel needs the versions to still exist** — `VERSION AS OF` / `TIMESTAMP AS OF`.
 
