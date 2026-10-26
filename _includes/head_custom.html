@@ -242,9 +242,15 @@
   function applyLinkTargets() {
     document.querySelectorAll("a[href]").forEach(function (link) {
       var href = link.getAttribute("href") || "";
+      var normalizedHref = href.trim().toLowerCase();
 
-      // Rule 1 — never touch in-page anchors or javascript: links.
-      if (href.startsWith("#") || href.startsWith("javascript:")) {
+      // Rule 1 — never touch in-page anchors or scriptable links.
+      if (
+        normalizedHref.startsWith("#") ||
+        normalizedHref.startsWith("javascript:") ||
+        normalizedHref.startsWith("data:") ||
+        normalizedHref.startsWith("vbscript:")
+      ) {
         return;
       }
 
