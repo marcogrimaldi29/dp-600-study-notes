@@ -164,7 +164,7 @@ flowchart TD
 |-----------|:---------:|:---------:|:-------------------:|:------------:|
 | **Engine** | Spark + SQL Analytics Endpoint | Full T-SQL | KQL (plus a T-SQL subset) | T-SQL (Azure SQL engine) |
 | **Write via T-SQL** | ❌ (read-only endpoint) | ✅ (INSERT, UPDATE, DELETE, MERGE) | ❌ | ✅ |
-| **Write via Spark** | ✅ | ❌ | ❌ | ❌ |
+| **Write via Spark** | ✅ | ✅ via Spark connector (`synapsesql`, Runtime 2.0): append/overwrite only, no UPDATE/DELETE/upsert | ✅ via Kusto Spark connector | ✅ via Spark connector for SQL databases (`mssql`) |
 | **Storage / OneLake** | Delta (Parquet) in OneLake | Delta (Parquet) in OneLake (T-SQL–managed) | Columnar (KQL engine); Delta copy in OneLake is **opt-in** | Row store, **auto-mirrored** to Delta in OneLake |
 | **Schema enforcement** | Schema-on-read or schema-on-write | Schema-on-write (strict) | Schema-on-write | Schema-on-write, enforced constraints |
 | **Unstructured files** | ✅ (Files/ folder) | ❌ | ❌ | ❌ |
@@ -177,6 +177,9 @@ flowchart TD
 {: .note }
 
 > **Exam Caveat:** A lakehouse has TWO entry points: (1) the Spark engine for read/write, and (2) the SQL analytics endpoint for read-only T-SQL. The exam frequently tests which operations are available on each.
+{: .warning }
+
+> **Exam Caveat:** A ✅ under *Write via Spark* for the Warehouse, Eventhouse or SQL database means **through a connector**, not native Delta writes. The Warehouse connector (`df.write.mode("append").synapsesql("wh.dbo.Sales")`) only bulk-loads whole DataFrames: it stages the data, runs `COPY INTO`, and can't UPDATE, DELETE or MERGE. It also can't write to a lakehouse's SQL analytics endpoint, which stays read-only. The rule of thumb still holds: **Spark-centric engineering → Lakehouse; T-SQL DML and multi-table transactions → Warehouse**.
 {: .warning }
 
 > **Exam Tip:** **Both** the Lakehouse and the Warehouse store their tables as **open Delta Parquet in OneLake** — the difference is the engine and write path (Spark vs full T-SQL), *not* the storage format. That shared Delta format is exactly why both can back a **Direct Lake** semantic model and be queried cross-engine. The Warehouse does *not* use a proprietary format.

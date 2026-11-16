@@ -155,7 +155,7 @@ graph TD
 |---|---|---|
 | Storage format | Delta Parquet in OneLake | Delta Parquet in OneLake |
 | Write via T-SQL | No (read-only SQL endpoint) | Yes (full DML/DDL) |
-| Write via Spark | Yes | No |
+| Write via Spark | Yes | Yes, via the Spark connector (`synapsesql`, Runtime 2.0): append or overwrite only, no UPDATE/DELETE/upsert |
 | Cross-database queries | As a source (read) | Full support |
 | Row/column-level security | Yes — T-SQL RLS/CLS on the SQL endpoint, or OneLake security roles | Yes (T-SQL RLS/CLS) |
 | Best for | Engineers, data scientists | Analysts, SQL-centric teams |
